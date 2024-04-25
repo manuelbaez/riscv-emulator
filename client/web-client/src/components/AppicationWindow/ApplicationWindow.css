@@ -1,0 +1,12 @@
+.application-window {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #757575;
+  width: 400px;
+  height: 400px;
+  position: absolute;
+}
+
+.application-window--content {
+  min-height: 15px;
+}

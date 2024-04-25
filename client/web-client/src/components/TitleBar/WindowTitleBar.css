@@ -1,0 +1,14 @@
+.window-title-bar {
+  height: 25px;
+  display: flex;
+  background-color: #9e9e9e;
+  padding: 1px 10px;
+  align-items: center;
+  justify-content: space-between;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.window-title-bar--button-row {
+  display: flex;
+}
