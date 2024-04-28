@@ -3,6 +3,7 @@ import { WindowTitleBar } from "../TitleBar/WindowTitleBar";
 import "./ApplicationWindow.css";
 
 type Props = {
+  defaultWindowName: string;
   children: ReactElement;
 };
 
@@ -11,9 +12,10 @@ type WindowPosition = {
   y: number;
 };
 
-export const ApplicationWindow = ({ children }: Props) => {
+export const ApplicationWindow = ({ defaultWindowName, children }: Props) => {
   const [position, setPosition] = useState({ x: 10, y: 10 } as WindowPosition);
   const [dragging, setDragging] = useState(false);
+  const [windowName, setWindowName] = useState(defaultWindowName);
 
   const draggingOffset = useRef({ x: 0, y: 0 } as WindowPosition);
 
@@ -28,10 +30,17 @@ export const ApplicationWindow = ({ children }: Props) => {
     [dragging]
   );
 
-  const onMouseDown = useCallback((event: React.MouseEvent) => {
-    draggingOffset.current.x = event.clientX - position.x;
-    draggingOffset.current.y = event.clientY - position.y;
-    setDragging(true);
+  const onMouseDown = useCallback(
+    (event: React.MouseEvent) => {
+      draggingOffset.current.x = event.clientX - position.x;
+      draggingOffset.current.y = event.clientY - position.y;
+      setDragging(true);
+    },
+    [position.x, position.y]
+  );
+
+  const onMouseUp = useCallback(() => {
+    setDragging(false);
   }, [dragging]);
 
   useEffect(() => {
@@ -42,6 +51,14 @@ export const ApplicationWindow = ({ children }: Props) => {
     }
   }, [dragging, onMouseMove]);
 
+  useEffect(() => {
+    if (dragging) {
+      const handler = () => onMouseUp();
+      window.addEventListener("mouseup", handler);
+      return () => window.removeEventListener("mouseup", handler);
+    }
+  }, [dragging, onMouseUp]);
+
   return (
     <div
       className="application-window"
@@ -50,8 +67,7 @@ export const ApplicationWindow = ({ children }: Props) => {
       <WindowTitleBar
         onCloseClicked={() => {}}
         onMouseDown={onMouseDown}
-        onMouseUp={() => setDragging(false)}
-        title="Window Name Test"
+        title={windowName}
       ></WindowTitleBar>
       <div className="application-window--content">{children}</div>
     </div>

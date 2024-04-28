@@ -1,13 +1,15 @@
 .window-title-bar {
-  height: 25px;
+  height: 35px;
   display: flex;
-  background-color: #9e9e9e;
+  color: #ffffff;
+  background-color: #37474f;
   padding: 1px 10px;
   align-items: center;
   justify-content: space-between;
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  font-size: 18px;
 }
 .window-title-bar--button-row {
   display: flex;
