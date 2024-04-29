@@ -13,10 +13,12 @@ type WindowPosition = {
 };
 
 export const ApplicationWindow = ({ defaultWindowName, children }: Props) => {
-  const [position, setPosition] = useState({ x: 10, y: 10 } as WindowPosition);
-  const [dragging, setDragging] = useState(false);
+  const [size, setSize] = useState({ x: 400, y: 400 } as WindowPosition);
   const [windowName, setWindowName] = useState(defaultWindowName);
 
+  // Dragging logic
+  const [position, setPosition] = useState({ x: 200, y: 200 } as WindowPosition);
+  const [dragging, setDragging] = useState(false);
   const draggingOffset = useRef({ x: 0, y: 0 } as WindowPosition);
 
   const onMouseMove = useCallback(
@@ -41,7 +43,7 @@ export const ApplicationWindow = ({ defaultWindowName, children }: Props) => {
 
   const onMouseUp = useCallback(() => {
     setDragging(false);
-  }, [dragging]);
+  }, []);
 
   useEffect(() => {
     if (dragging) {
@@ -62,7 +64,12 @@ export const ApplicationWindow = ({ defaultWindowName, children }: Props) => {
   return (
     <div
       className="application-window"
-      style={{ top: position.y, left: position.x }}
+      style={{
+        top: position.y,
+        left: position.x,
+        width: size.x,
+        height: size.y,
+      }}
     >
       <WindowTitleBar
         onCloseClicked={() => {}}

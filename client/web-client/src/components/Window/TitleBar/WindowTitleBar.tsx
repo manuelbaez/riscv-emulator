@@ -1,4 +1,4 @@
-import { RoundButton } from "../RoundButton/RoundButton";
+import { RoundButton } from "../../RoundButton/RoundButton";
 import CloseIcon from "@mui/icons-material/Close";
 import MinimizeIcon from "@mui/icons-material/Minimize";
 import MaximizeIcon from "@mui/icons-material/Maximize";
