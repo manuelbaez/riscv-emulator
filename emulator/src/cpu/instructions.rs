@@ -26,7 +26,7 @@ pub struct IFormatInstruction {
     pub rd: u8,
     pub funct3: u8,
     pub rs1: u8,
-    pub imm: u16,
+    pub imm: u64, //sign-extended and u64 to match register size
 }
 impl From<u32> for IFormatInstruction {
     fn from(instruction: u32) -> Self {
@@ -35,7 +35,7 @@ impl From<u32> for IFormatInstruction {
             rd: ((instruction >> 7) & 0x1f) as u8,
             funct3: ((instruction) >> 12 & 0x07) as u8,
             rs1: ((instruction >> 15) & 0x1f) as u8,
-            imm: ((instruction >> 20) & 0xfff) as u16,
+            imm: ((instruction as i32 as i64) >> 20) as u64,
         }
     }
 }
@@ -45,7 +45,7 @@ pub struct SFormatInstruction {
     pub funct3: u8,
     pub rs1: u8,
     pub rs2: u8,
-    pub imm: u16,
+    pub imm: u64, //sign-extended and u64 to match register size
 }
 impl From<u32> for SFormatInstruction {
     fn from(instruction: u32) -> Self {
@@ -54,7 +54,8 @@ impl From<u32> for SFormatInstruction {
             funct3: ((instruction) >> 12 & 0x07) as u8,
             rs1: ((instruction >> 15) & 0x1f) as u8,
             rs2: ((instruction >> 20) & 0x1f) as u8,
-            imm: (((instruction >> 25) & 0x3f) << 5) as u16 | ((instruction >> 7) & 0x1f) as u16,
+            imm: (((instruction as i32 as i64 >> 25) & 0x3f) << 5) as u64
+                | ((instruction >> 7) & 0x1f) as u16 as u64,
         }
     }
 }
@@ -62,14 +63,14 @@ impl From<u32> for SFormatInstruction {
 pub struct UFormatInstruction {
     pub opcode: u8,
     pub rd: u8,
-    pub imm: u32,
+    pub imm: u64,
 }
 impl From<u32> for UFormatInstruction {
     fn from(instruction: u32) -> Self {
         Self {
             opcode: (instruction & 0x7f) as u8,
             rd: ((instruction >> 7) & 0x1f) as u8,
-            imm: (instruction >> 12) as u32,
+            imm: (instruction as i32 as i64 >> 12) as u64,
         }
     }
 }
@@ -97,4 +98,6 @@ pub struct CpuInstructionsOpCodes;
 impl CpuInstructionsOpCodes {
     pub const ADDI: u8 = 0x13;
     pub const ADD: u8 = 0x33;
+    pub const LOAD: u8 = 0x03;
+    pub const STORE: u8 = 0x23;
 }
