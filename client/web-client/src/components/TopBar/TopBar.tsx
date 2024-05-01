@@ -13,7 +13,7 @@ export const TopBar = () => {
   return (
     <div className="top-bar">
       <div></div>
-      <div>{`${date.toDateString()} - ${date.toLocaleTimeString()}`}</div>
+      <div className="bar--clock">{`${date.toDateString()} - ${date.toLocaleTimeString()}`}</div>
       <div></div>
     </div>
   );

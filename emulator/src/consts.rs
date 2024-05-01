@@ -1,0 +1,4 @@
+pub const MEGABYTES_BYTES: u64 = 1024 * 1024;
+
+pub const DRAM_BASE_ADDR: u64 = 0x8000_0000_u64;
+pub const DRAM_SIZE: u64 = 4096 * MEGABYTES_BYTES;
