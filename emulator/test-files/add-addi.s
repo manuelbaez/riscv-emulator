@@ -6,3 +6,5 @@ main:
   addi gp, sp, -7
   sb a2, 0(gp) 
   lb t1, 0(gp) 
+  lbu t2, 0(gp) 
+  

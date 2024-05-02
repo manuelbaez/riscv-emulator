@@ -1,16 +1,15 @@
 use crate::{consts::DRAM_BASE_ADDR, system_bus::SystemBus};
 
-use self::{
-    excecutors::CpuInstructionExecutors,
-    instructions::{CpuInstructionsOpCodes, InstructionsDecoder, DEFAULT_ISNTRUCTION_SIZE_BYTES},
+use self::instructions::{
+    CpuInstructionsOpCodes, InstructionsDecoder, DEFAULT_ISNTRUCTION_SIZE_BYTES,
 };
 
-mod excecutors;
+mod instruction_excecutors;
 mod instructions;
 
 pub struct Cpu {
     pub registers: [u64; 32],
-    pub program_counter: u64,
+    program_counter: u64,
     pub system_bus: SystemBus,
 }
 
@@ -36,19 +35,19 @@ impl Cpu {
         match InstructionsDecoder::get_op_code(instruction) {
             CpuInstructionsOpCodes::ADDI => {
                 let decoded = InstructionsDecoder::decode_i_format_instruction(instruction);
-                CpuInstructionExecutors::addi(self, decoded)
+                self.addi(decoded)
             }
             CpuInstructionsOpCodes::ADD => {
                 let decoded = InstructionsDecoder::decode_r_format_instruction(instruction);
-                CpuInstructionExecutors::add(self, decoded)
+                self.add(decoded)
             }
             CpuInstructionsOpCodes::LOAD => {
                 let decoded = InstructionsDecoder::decode_i_format_instruction(instruction);
-                CpuInstructionExecutors::load(self, decoded)
+                self.load(decoded)
             }
             CpuInstructionsOpCodes::STORE => {
                 let decoded = InstructionsDecoder::decode_s_format_instruction(instruction);
-                CpuInstructionExecutors::store(self, decoded)
+                self.store(decoded)
             }
             _ => {
                 dbg!("instruction not implemented");
@@ -70,7 +69,7 @@ impl Cpu {
                 "{}\n{}",
                 output,
                 format!(
-                    "x{:02}({})={:>#18x} x{:02}({})={:>#18x} x{:02}({})={:>#18x} x{:02}({})={:>#18x}",
+                    "x{:02}({})={:>#18x}\tx{:02}({})={:>#18x}\tx{:02}({})={:>#18x}\tx{:02}({})={:>#18x}",
                     i,
                     abi[i],
                     self.registers[i],
