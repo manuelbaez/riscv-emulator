@@ -21,16 +21,16 @@ impl SystemMemory {
         Self { data }
     }
 
-    // pub fn load(&self, addr: u64, size: MemoryOpSize) -> Result<u64, ()> {
-    //     self.validate_mem_address(addr)
-    //         .expect("Invalid memory address");
-    //     match size {
-    //         MemoryOpSize::B8 => Ok(self.load8(addr) as u64),
-    //         MemoryOpSize::B16 => Ok(self.load16(addr) as u64),
-    //         MemoryOpSize::B32 => match self.load32(addr) {},
-    //         MemoryOpSize::B64 => Ok(self.load64(addr) as u64),
-    //     }
-    // }
+    pub fn load(&self, addr: u64, size: MemoryOpSize) -> Result<u64, ()> {
+        self.validate_mem_address(addr)
+            .expect("Invalid memory address");
+        match size {
+            MemoryOpSize::B8 => self.load8(addr).map(|r| r as u64),
+            MemoryOpSize::B16 => self.load16(addr).map(|r| r as u64),
+            MemoryOpSize::B32 => self.load32(addr).map(|r| r as u64),
+            MemoryOpSize::B64 => self.load64(addr),
+        }
+    }
 
     pub fn store(&mut self, addr: u64, size: MemoryOpSize, value: u64) -> Result<(), ()> {
         self.validate_mem_address(addr)
@@ -50,36 +50,54 @@ impl SystemMemory {
         }
     }
 
-    pub fn load8(&self, addr: u64) -> u8 {
-        let index = addr as usize;
-        self.data[index] as u8
+    pub fn load8(&self, addr: u64) -> Result<u8, ()> {
+        match self.validate_mem_address(addr) {
+            Ok(()) => {
+                let index = addr as usize;
+                Ok(self.data[index] as u8)
+            }
+            Err(err) => Err(err),
+        }
     }
 
-    pub fn load16(&self, addr: u64) -> u16 {
-        let index = addr as usize;
-        (self.data[index] as u16) | ((self.data[index + 1] as u16) << 8)
+    pub fn load16(&self, addr: u64) -> Result<u16, ()> {
+        match self.validate_mem_address(addr) {
+            Ok(()) => {
+                let index = addr as usize;
+                Ok((self.data[index] as u16) | ((self.data[index + 1] as u16) << 8))
+            }
+            Err(err) => Err(err),
+        }
     }
 
     pub fn load32(&self, addr: u64) -> Result<u32, ()> {
-        self.validate_mem_address(addr)
-            .expect("Invalid memory address");
-        let index = addr as usize;
-        Ok((self.data[index] as u32)
-            | ((self.data[index + 1] as u32) << 8)
-            | ((self.data[index + 2] as u32) << 16)
-            | ((self.data[index + 3] as u32) << 24))
+        match self.validate_mem_address(addr) {
+            Ok(()) => {
+                let index = addr as usize;
+                Ok((self.data[index] as u32)
+                    | ((self.data[index + 1] as u32) << 8)
+                    | ((self.data[index + 2] as u32) << 16)
+                    | ((self.data[index + 3] as u32) << 24))
+            }
+            Err(err) => Err(err),
+        }
     }
 
-    pub fn load64(&self, addr: u64) -> u64 {
-        let index = addr as usize;
-        (self.data[index] as u64)
-            | ((self.data[index + 1] as u64) << 8)
-            | ((self.data[index + 2] as u64) << 16)
-            | ((self.data[index + 3] as u64) << 24)
-            | ((self.data[index + 4] as u64) << 32)
-            | ((self.data[index + 5] as u64) << 40)
-            | ((self.data[index + 6] as u64) << 48)
-            | ((self.data[index + 7] as u64) << 56)
+    pub fn load64(&self, addr: u64) -> Result<u64, ()> {
+        match self.validate_mem_address(addr) {
+            Ok(()) => {
+                let index = addr as usize;
+                Ok((self.data[index] as u64)
+                    | ((self.data[index + 1] as u64) << 8)
+                    | ((self.data[index + 2] as u64) << 16)
+                    | ((self.data[index + 3] as u64) << 24)
+                    | ((self.data[index + 4] as u64) << 32)
+                    | ((self.data[index + 5] as u64) << 40)
+                    | ((self.data[index + 6] as u64) << 48)
+                    | ((self.data[index + 7] as u64) << 56))
+            }
+            Err(err) => Err(err),
+        }
     }
 
     fn store8(&mut self, addr: u64, value: u64) {

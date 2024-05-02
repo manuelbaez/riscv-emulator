@@ -18,31 +18,39 @@ impl SystemBus {
         }
     }
 
-    // pub fn load(&self, addr: u64, size: BusOpSize) -> Result<u64, ()> {
-    //     match addr.cmp(&DRAM_BASE_ADDR) {
-    //         Ordering::Less => Err(()),
-    //         _ => self.system_memory.load(addr - DRAM_BASE_ADDR, size),
-    //     }
-    // }
-    
+    #[allow(dead_code)]
+    pub fn load(&self, addr: u64, size: BusOpSize) -> Result<u64, ()> {
+        match addr.cmp(&DRAM_BASE_ADDR) {
+            Ordering::Less => Err(()),
+            _ => self.system_memory.load(addr - DRAM_BASE_ADDR, size),
+        }
+    }
+
     pub fn load8(&self, addr: u64) -> Result<u8, ()> {
         match addr.cmp(&DRAM_BASE_ADDR) {
             Ordering::Less => Err(()),
-            _ => Ok(self.system_memory.load8(addr - DRAM_BASE_ADDR)),
+            _ => self.system_memory.load8(addr - DRAM_BASE_ADDR),
         }
     }
 
     pub fn load16(&self, addr: u64) -> Result<u16, ()> {
         match addr.cmp(&DRAM_BASE_ADDR) {
             Ordering::Less => Err(()),
-            _ => Ok(self.system_memory.load16(addr - DRAM_BASE_ADDR)),
+            _ => self.system_memory.load16(addr - DRAM_BASE_ADDR),
         }
     }
-    
+
     pub fn load32(&self, addr: u64) -> Result<u32, ()> {
         match addr.cmp(&DRAM_BASE_ADDR) {
             Ordering::Less => Err(()),
             _ => self.system_memory.load32(addr - DRAM_BASE_ADDR),
+        }
+    }
+
+    pub fn load64(&self, addr: u64) -> Result<u64, ()> {
+        match addr.cmp(&DRAM_BASE_ADDR) {
+            Ordering::Less => Err(()),
+            _ => self.system_memory.load64(addr - DRAM_BASE_ADDR),
         }
     }
 

@@ -21,7 +21,7 @@ impl Cpu {
             program_counter: DRAM_BASE_ADDR,
             system_bus: SystemBus::new(memory_size, init_code),
         };
-        cpu.registers[0x02] = DRAM_BASE_ADDR + memory_size;
+        cpu.registers[0x02] = DRAM_BASE_ADDR + memory_size - 1;
         cpu
     }
 
@@ -40,15 +40,22 @@ impl Cpu {
             }
             CpuInstructionsOpCodes::ADD => {
                 let decoded = InstructionsDecoder::decode_r_format_instruction(instruction);
-                CpuInstructionExecutors::add(self, decoded);
+                CpuInstructionExecutors::add(self, decoded)
+            }
+            CpuInstructionsOpCodes::LOAD => {
+                let decoded = InstructionsDecoder::decode_i_format_instruction(instruction);
+                CpuInstructionExecutors::load(self, decoded)
+            }
+            CpuInstructionsOpCodes::STORE => {
+                let decoded = InstructionsDecoder::decode_s_format_instruction(instruction);
+                CpuInstructionExecutors::store(self, decoded)
             }
             _ => {
                 dbg!("instruction not implemented");
                 dbg!(instruction);
-                return Err(());
+                Err(())
             }
         }
-        Ok(())
     }
 
     pub fn dump_registers(&self) {

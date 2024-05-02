@@ -1,3 +1,4 @@
+pub mod op_types;
 pub const DEFAULT_ISNTRUCTION_SIZE_BYTES: usize = 4;
 
 pub struct RFormatInstruction {
@@ -45,6 +46,7 @@ pub struct SFormatInstruction {
     pub funct3: u8,
     pub rs1: u8,
     pub rs2: u8,
+    /// imm[11:5|4:0] = inst[31:25|11:7]
     pub imm: u64, //sign-extended and u64 to match register size
 }
 impl From<u32> for SFormatInstruction {
@@ -54,8 +56,8 @@ impl From<u32> for SFormatInstruction {
             funct3: ((instruction) >> 12 & 0x07) as u8,
             rs1: ((instruction >> 15) & 0x1f) as u8,
             rs2: ((instruction >> 20) & 0x1f) as u8,
-            imm: (((instruction as i32 as i64 >> 25) & 0x3f) << 5) as u64
-                | ((instruction >> 7) & 0x1f) as u16 as u64,
+            imm: ((instruction & 0xfe00_0000) as i32 as i64 >> 20) as u64
+                | ((instruction >> 7) & 0x1f) as u64,
         }
     }
 }
@@ -70,7 +72,7 @@ impl From<u32> for UFormatInstruction {
         Self {
             opcode: (instruction & 0x7f) as u8,
             rd: ((instruction >> 7) & 0x1f) as u8,
-            imm: (instruction as i32 as i64 >> 12) as u64,
+            imm: (instruction & 0xffff_f000_u32) as i32 as i64 as u64, // remove the first 12 bits for load upper instructions
         }
     }
 }
