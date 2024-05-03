@@ -1,16 +1,24 @@
-use crate::{consts::DRAM_BASE_ADDR, system_bus::SystemBus};
-
-use self::instructions::{
-    CpuInstructionsOpCodes, InstructionsDecoder, DEFAULT_ISNTRUCTION_SIZE_BYTES,
+use crate::{
+    consts::DRAM_BASE_ADDR,
+    error::{AppErrors, AppResult},
+    system_bus::SystemBus,
 };
 
+use self::instructions::{
+    decoder::InstructionsDecoder, implementations::CpuInstructionsOpCodes, DEFAULT_ISNTRUCTION_SIZE_BYTES,
+};
+
+mod cs_registers;
 mod instruction_excecutors;
 mod instructions;
 
+const CPU_REG_COUNT: usize = 32;
+
 pub struct Cpu {
-    pub registers: [u64; 32],
+    registers: [u64; CPU_REG_COUNT],
     program_counter: u64,
     pub system_bus: SystemBus,
+    cs_registers: [u64; 4096],
 }
 
 impl Cpu {
@@ -19,23 +27,38 @@ impl Cpu {
             registers: [0_u64; 32],
             program_counter: DRAM_BASE_ADDR,
             system_bus: SystemBus::new(memory_size, init_code),
+            cs_registers: [0_u64; 4096],
         };
         cpu.registers[0x02] = DRAM_BASE_ADDR + memory_size - 1;
         cpu
     }
 
-    pub fn fetch_next_instruction(&mut self) -> Result<u32, ()> {
+    pub fn fetch_next_instruction(&mut self) -> AppResult<u32> {
         self.system_bus.load32(self.program_counter)
     }
 
-    pub fn execute(&mut self, instruction: u32) -> Result<(), ()> {
+    pub fn read_reg(&mut self, register: usize) -> AppResult<u64> {
+        if register > CPU_REG_COUNT {
+            return Err(AppErrors::OutOfBoundRegister);
+        }
+        Ok(self.registers[register])
+    }
+
+    pub fn write_reg(&mut self, register: usize, value: u64) -> AppResult<()> {
+        if register == 0x0 {
+            return Err(AppErrors::RegisterWriteProhibited);
+        }
+        Ok(self.registers[register] = value)
+    }
+
+    pub fn execute(&mut self, instruction: u32) -> AppResult<()> {
         // Increase the program counter to lookup the next instruction in the next cycle
         self.program_counter += DEFAULT_ISNTRUCTION_SIZE_BYTES as u64;
 
         match InstructionsDecoder::get_op_code(instruction) {
-            CpuInstructionsOpCodes::ADDI => {
+            CpuInstructionsOpCodes::INT_REG_IMMEDIATE => {
                 let decoded = InstructionsDecoder::decode_i_format_instruction(instruction);
-                self.addi(decoded)
+                self.int_reg_immediate(decoded)
             }
             CpuInstructionsOpCodes::ADD => {
                 let decoded = InstructionsDecoder::decode_r_format_instruction(instruction);
@@ -52,7 +75,7 @@ impl Cpu {
             _ => {
                 dbg!("instruction not implemented");
                 dbg!(instruction);
-                Err(())
+                Err(AppErrors::InstructionNotImplemented)
             }
         }
     }

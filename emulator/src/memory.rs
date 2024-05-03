@@ -1,5 +1,7 @@
 use std::cmp::Ordering;
 
+use crate::error::{AppErrors, AppResult};
+
 pub struct SystemMemory {
     pub data: Vec<u8>,
 }
@@ -21,36 +23,35 @@ impl SystemMemory {
         Self { data }
     }
 
-    pub fn load(&self, addr: u64, size: MemoryOpSize) -> Result<u64, ()> {
-        self.validate_mem_address(addr)
-            .expect("Invalid memory address");
-        match size {
-            MemoryOpSize::B8 => self.load8(addr).map(|r| r as u64),
-            MemoryOpSize::B16 => self.load16(addr).map(|r| r as u64),
-            MemoryOpSize::B32 => self.load32(addr).map(|r| r as u64),
-            MemoryOpSize::B64 => self.load64(addr),
+    pub fn load(&self, addr: u64, size: MemoryOpSize) -> AppResult<u64> {
+        match self.validate_mem_address(addr) {
+            Ok(_) => match size {
+                MemoryOpSize::B8 => self.load8(addr).map(|r| r as u64),
+                MemoryOpSize::B16 => self.load16(addr).map(|r| r as u64),
+                MemoryOpSize::B32 => self.load32(addr).map(|r| r as u64),
+                MemoryOpSize::B64 => self.load64(addr),
+            },
+            Err(err) => Err(err),
         }
     }
 
-    pub fn store(&mut self, addr: u64, size: MemoryOpSize, value: u64) -> Result<(), ()> {
-        self.validate_mem_address(addr)
-            .expect("Invalid memory address");
-        match size {
-            MemoryOpSize::B8 => Ok(self.store8(addr, value)),
-            MemoryOpSize::B16 => Ok(self.store16(addr, value)),
-            MemoryOpSize::B32 => Ok(self.store32(addr, value)),
-            MemoryOpSize::B64 => Ok(self.store64(addr, value)),
-        }
+    pub fn store(&mut self, addr: u64, size: MemoryOpSize, value: u64) -> AppResult<()> {
+        self.validate_mem_address(addr).map(|_| match size {
+            MemoryOpSize::B8 => self.store8(addr, value),
+            MemoryOpSize::B16 => self.store16(addr, value),
+            MemoryOpSize::B32 => self.store32(addr, value),
+            MemoryOpSize::B64 => self.store64(addr, value),
+        })
     }
 
-    fn validate_mem_address(&self, addr: u64) -> Result<(), ()> {
+    fn validate_mem_address(&self, addr: u64) -> AppResult<()> {
         match (addr as usize).cmp(&self.data.len()) {
             Ordering::Less => Ok(()),
-            _ => Err(()),
+            _ => Err(AppErrors::OutOfBoundsPointer),
         }
     }
 
-    pub fn load8(&self, addr: u64) -> Result<u8, ()> {
+    pub fn load8(&self, addr: u64) -> AppResult<u8> {
         match self.validate_mem_address(addr) {
             Ok(()) => {
                 let index = addr as usize;
@@ -60,7 +61,7 @@ impl SystemMemory {
         }
     }
 
-    pub fn load16(&self, addr: u64) -> Result<u16, ()> {
+    pub fn load16(&self, addr: u64) -> AppResult<u16> {
         match self.validate_mem_address(addr) {
             Ok(()) => {
                 let index = addr as usize;
@@ -70,7 +71,7 @@ impl SystemMemory {
         }
     }
 
-    pub fn load32(&self, addr: u64) -> Result<u32, ()> {
+    pub fn load32(&self, addr: u64) -> AppResult<u32> {
         match self.validate_mem_address(addr) {
             Ok(()) => {
                 let index = addr as usize;
@@ -83,7 +84,7 @@ impl SystemMemory {
         }
     }
 
-    pub fn load64(&self, addr: u64) -> Result<u64, ()> {
+    pub fn load64(&self, addr: u64) -> AppResult<u64> {
         match self.validate_mem_address(addr) {
             Ok(()) => {
                 let index = addr as usize;

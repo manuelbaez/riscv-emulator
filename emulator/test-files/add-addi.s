@@ -7,4 +7,6 @@ main:
   sb a2, 0(gp) 
   lb t1, 0(gp) 
   lbu t2, 0(gp) 
+  sltiu a1, t2, 8
+  slti a5, t2, 8
   

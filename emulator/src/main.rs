@@ -5,6 +5,7 @@ use cpu::Cpu;
 
 mod consts;
 mod cpu;
+mod error;
 mod memory;
 mod system_bus;
 
@@ -27,7 +28,10 @@ fn main() {
         };
         match cpu.execute(instruction) {
             Ok(_) => (),
-            Err(_) => break,
+            Err(err) => {
+                dbg!(err);
+                break;
+            }
         };
     }
     cpu.dump_registers();
