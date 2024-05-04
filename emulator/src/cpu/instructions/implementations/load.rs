@@ -1,13 +1,15 @@
 use crate::{
-    cpu::{instructions::decoder::IFormatInstruction, Cpu},
+    cpu::{
+        instructions::decoder::{Funct3Decoder, ITypeDecoder, RdDecoder, Rs1Decoder},
+        Cpu,
+    },
     error::{AppErrors, AppResult},
 };
 
-pub const OP_CODE: u8 = 0x03;
+use super::SubFunctions;
 
 ///Funct3 field Sub-instructions
-pub struct SubInstructions;
-impl SubInstructions {
+impl SubFunctions {
     /// Load Byte
     pub const LB: u8 = 0x0;
     /// Load Half Word (16-bit)
@@ -25,46 +27,46 @@ impl SubInstructions {
 }
 
 impl Cpu {
-    pub fn load(&mut self, instruction: IFormatInstruction) -> AppResult<()> {
-        let addr: u64 = self.registers[instruction.rs1 as usize].wrapping_add(instruction.imm);
-        match instruction.funct3 {
-            SubInstructions::LB => match self.system_bus.load8(addr) {
-                Ok(value) => {
-                    self.write_reg(instruction.rd as usize, value as i8 as i64 as u64)
-                }
-                Err(err) => Err(err),
-            },
-            SubInstructions::LH => match self.system_bus.load16(addr) {
-                Ok(value) => {
-                    self.write_reg(instruction.rd as usize, value as i16 as i64 as u64)
-                }
-                Err(err) => Err(err),
-            },
-            SubInstructions::LW => match self.system_bus.load32(addr) {
-                Ok(value) => {
-                    self.write_reg(instruction.rd as usize, value as i32 as i64 as u64)
-                }
-                Err(err) => Err(err),
-            },
-            SubInstructions::LD => match self.system_bus.load64(addr) {
-                Ok(value) => {
-                    self.write_reg(instruction.rd as usize, value)
-                }
-                Err(err) => Err(err),
-            },
-            SubInstructions::LBU => match self.system_bus.load8(addr) {
-                Ok(value) => self.write_reg(instruction.rd as usize, value as u64),
-                Err(err) => Err(err),
-            },
-            SubInstructions::LHU => match self.system_bus.load16(addr) {
-                Ok(value) => self.write_reg(instruction.rd as usize, value as u64),
-                Err(err) => Err(err),
-            },
-            SubInstructions::LWU => match self.system_bus.load32(addr) {
-                Ok(value) => self.write_reg(instruction.rd as usize, value as u64),
-                Err(err) => Err(err),
-            },
-            _ => Err(AppErrors::FuctionNotImplemented),
-        }
-    }
+    // pub fn load(&mut self, instruction: u32) -> AppResult<()> {
+    //     let instruction = ITypeDecoder::new(instruction);
+    //     let addr: u64 =
+    //         self.registers[instruction.get_rs1() as usize].wrapping_add(instruction.get_imm());
+    //     match instruction.get_funct3() {
+    //         SubFunctions::LB => match self.system_bus.load8(addr) {
+    //             Ok(value) => {
+    //                 self.write_reg(instruction.get_rd() as usize, value as i8 as i64 as u64)
+    //             }
+    //             Err(err) => Err(err),
+    //         },
+    //         SubFunctions::LH => match self.system_bus.load16(addr) {
+    //             Ok(value) => {
+    //                 self.write_reg(instruction.get_rd() as usize, value as i16 as i64 as u64)
+    //             }
+    //             Err(err) => Err(err),
+    //         },
+    //         SubFunctions::LW => match self.system_bus.load32(addr) {
+    //             Ok(value) => {
+    //                 self.write_reg(instruction.get_rd() as usize, value as i32 as i64 as u64)
+    //             }
+    //             Err(err) => Err(err),
+    //         },
+    //         SubFunctions::LD => match self.system_bus.load64(addr) {
+    //             Ok(value) => self.write_reg(instruction.get_rd() as usize, value),
+    //             Err(err) => Err(err),
+    //         },
+    //         SubFunctions::LBU => match self.system_bus.load8(addr) {
+    //             Ok(value) => self.write_reg(instruction.get_rd() as usize, value as u64),
+    //             Err(err) => Err(err),
+    //         },
+    //         SubFunctions::LHU => match self.system_bus.load16(addr) {
+    //             Ok(value) => self.write_reg(instruction.get_rd() as usize, value as u64),
+    //             Err(err) => Err(err),
+    //         },
+    //         SubFunctions::LWU => match self.system_bus.load32(addr) {
+    //             Ok(value) => self.write_reg(instruction.get_rd() as usize, value as u64),
+    //             Err(err) => Err(err),
+    //         },
+    //         _ => Err(AppErrors::FuctionNotImplemented),
+    //     }
+    // }
 }

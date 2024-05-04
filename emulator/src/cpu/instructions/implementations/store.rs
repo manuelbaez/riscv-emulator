@@ -1,14 +1,9 @@
-use crate::{
-    cpu::{instructions::decoder::SFormatInstruction, Cpu},
-    error::{AppErrors, AppResult},
-    memory::MemoryOpSize,
-};
+use crate::cpu::Cpu;
 
-pub const OP_CODE: u8 = 0x23;
+use super::SubFunctions;
 
 ///Funct3 field Sub-instructions
-pub struct SubInstructions;
-impl SubInstructions {
+impl SubFunctions {
     /// Store Byte
     pub const SB: u8 = 0x0;
     /// Store Half Word (16-bit)
@@ -20,30 +15,31 @@ impl SubInstructions {
 }
 
 impl Cpu {
-    pub fn store(&mut self, instruction: SFormatInstruction) -> AppResult<()> {
-        let addr: u64 = self.registers[instruction.rs1 as usize].wrapping_add(instruction.imm);
-        match instruction.funct3 {
-            SubInstructions::SB => self.system_bus.store(
-                addr,
-                MemoryOpSize::B8,
-                self.registers[instruction.rs2 as usize],
-            ),
-            SubInstructions::SH => self.system_bus.store(
-                addr,
-                MemoryOpSize::B16,
-                self.registers[instruction.rs2 as usize],
-            ),
-            SubInstructions::SW => self.system_bus.store(
-                addr,
-                MemoryOpSize::B32,
-                self.registers[instruction.rs2 as usize],
-            ),
-            SubInstructions::SD => self.system_bus.store(
-                addr,
-                MemoryOpSize::B64,
-                self.registers[instruction.rs2 as usize],
-            ),
-            _ => Err(AppErrors::FuctionNotImplemented),
-        }
-    }
+    // pub fn store(&mut self, instruction: u32) -> AppResult<()> {
+    //     let decoder = STypeDecoder::new(instruction);
+    //     let addr: u64 = self.registers[decoder.get_rs1() as usize].wrapping_add(decoder.get_imm());
+    //     match decoder.get_funct3() {
+    //         SubFunctions::SB => self.system_bus.store(
+    //             addr,
+    //             MemoryOpSize::B8,
+    //             self.registers[decoder.get_rs2() as usize],
+    //         ),
+    //         SubFunctions::SH => self.system_bus.store(
+    //             addr,
+    //             MemoryOpSize::B16,
+    //             self.registers[decoder.get_rs2() as usize],
+    //         ),
+    //         SubFunctions::SW => self.system_bus.store(
+    //             addr,
+    //             MemoryOpSize::B32,
+    //             self.registers[decoder.get_rs2() as usize],
+    //         ),
+    //         SubFunctions::SD => self.system_bus.store(
+    //             addr,
+    //             MemoryOpSize::B64,
+    //             self.registers[decoder.get_rs2() as usize],
+    //         ),
+    //         _ => Err(AppErrors::FuctionNotImplemented),
+    //     }
+    // }
 }

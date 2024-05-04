@@ -1,12 +1,17 @@
 use crate::{
-    cpu::{instructions::decoder::IFormatInstruction, Cpu},
+    cpu::{
+        instruction_excecutors::InstructionsExecutor,
+        instructions::decoder::{ITypeDecoder, RdDecoder, Rs1Decoder, UTypeDecoder},
+        Cpu,
+    },
     error::AppResult,
 };
 
-pub const OP_CODE: u8 = 0x13;
+use super::SubFunctions;
+
 ///Funct3 field Sub-instructions
-pub struct SubInstructions;
-impl SubInstructions {
+impl SubFunctions {
+    //For opcode 0010011(0x13)
     ///Add Immediate
     pub const ADDI: u8 = 0x0;
     ///Set less than immediate
@@ -14,31 +19,91 @@ impl SubInstructions {
     ///Set less than immediate unsigned
     pub const SLTIU: u8 = 0x3;
     pub const XORI: u8 = 0x4;
-    pub const ORI: u8 = 0x7;
+    pub const ORI: u8 = 0x6;
+    pub const ANDI: u8 = 0x7;
+    pub const SLLI: u8 = 0x01;
+
+    pub const SRLI_SRAI_F3: u8 = 0x05;
+    pub const SRLI: (u8, u8) = (Self::SRLI_SRAI_F3, 0x00);
+    pub const SRAI: (u8, u8) = (Self::SRLI_SRAI_F3, 0x10);
 }
 
-impl Cpu {
-    pub fn int_reg_immediate(&mut self, instruction: IFormatInstruction) -> AppResult<()> {
-        match instruction.funct3 {
-            SubInstructions::ADDI => {
-                let value =
-                    self.registers[instruction.rs1 as usize].wrapping_add(instruction.imm as u64);
-                self.write_reg(instruction.rd as usize, value)
-            }
-            SubInstructions::SLTI => {
-                let value =
-                    (self.registers[instruction.rs1 as usize] as i64) < (instruction.imm as i64);
-                self.write_reg(instruction.rd as usize, value as u64)
-            }
-            SubInstructions::SLTIU => {
-                let value = self.registers[instruction.rs1 as usize] < instruction.imm;
-                self.write_reg(instruction.rd as usize, value as u64)
-            }
-            _ => {
-                dbg!(instruction.opcode);
-                dbg!(instruction.funct3);
-                Err(crate::error::AppErrors::InstructionNotImplemented)
-            }
-        }
+impl InstructionsExecutor {
+    #[inline(always)]
+    pub fn addi(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+        let value = cpu.registers[instruction.get_rs1() as usize]
+            .wrapping_add(instruction.get_imm() as u64);
+        cpu.write_reg(instruction.get_rd() as usize, value)
+    }
+
+    #[inline(always)]
+    pub fn slti(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+        let value =
+            (cpu.registers[instruction.get_rs1() as usize] as i64) < (instruction.get_imm() as i64);
+        cpu.write_reg(instruction.get_rd() as usize, value as u64)
+    }
+
+    #[inline(always)]
+    pub fn sltiu(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+        let value = cpu.registers[instruction.get_rs1() as usize] < instruction.get_imm();
+        cpu.write_reg(instruction.get_rd() as usize, value as u64)
+    }
+
+    #[inline(always)]
+    pub fn ori(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+        cpu.write_reg(
+            instruction.get_rd() as usize,
+            cpu.registers[instruction.get_rs1() as usize] | instruction.get_imm(),
+        )
+    }
+
+    #[inline(always)]
+    pub fn xori(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+        cpu.write_reg(
+            instruction.get_rd() as usize,
+            cpu.registers[instruction.get_rs1() as usize] ^ instruction.get_imm(),
+        )
+    }
+
+    #[inline(always)]
+    pub fn andi(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+        cpu.write_reg(
+            instruction.get_rd() as usize,
+            cpu.registers[instruction.get_rs1() as usize] & instruction.get_imm(),
+        )
+    }
+
+    #[inline(always)]
+    pub fn slli(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+        let shamt = (instruction.get_imm() & 0x3f) as u32; // shamt is encoded in the lower 6bit of the imm for RV64I
+        cpu.write_reg(
+            instruction.get_rd() as usize,
+            cpu.registers[instruction.get_rs1() as usize].wrapping_shl(shamt),
+        )
+    }
+
+    #[inline(always)]
+    pub fn srli(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+        let shamt = (instruction.get_imm() & 0x3f) as u32; // shamt is encoded in the lower 6bit of the imm for RV64I
+        cpu.write_reg(
+            instruction.get_rd() as usize,
+            cpu.registers[instruction.get_rs1() as usize].wrapping_shr(shamt),
+        )
+    }
+
+    #[inline(always)]
+    pub fn srai(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+        let shamt = (instruction.get_imm() & 0x3f) as u32; // shamt is encoded in the lower 6bit of the imm for RV64I
+        cpu.write_reg(
+            instruction.get_rd() as usize,
+            (cpu.registers[instruction.get_rs1() as usize] as i64).wrapping_shr(shamt) as u64,
+        )
+    }
+
+    pub fn lui(cpu: &mut Cpu, instruction: UTypeDecoder) -> AppResult<()> {
+        cpu.write_reg(
+            instruction.get_rd() as usize,
+            (instruction.get_imm() as i64).wrapping_shl(12) as u64,
+        )
     }
 }

@@ -5,7 +5,7 @@ use crate::{
 };
 
 use self::instructions::{
-    decoder::InstructionsDecoder, implementations::CpuInstructionsOpCodes, DEFAULT_ISNTRUCTION_SIZE_BYTES,
+    decoder, implementations::CpuInstructionsOpCodes, DEFAULT_ISNTRUCTION_SIZE_BYTES,
 };
 
 mod cs_registers;
@@ -36,48 +36,20 @@ impl Cpu {
     pub fn fetch_next_instruction(&mut self) -> AppResult<u32> {
         self.system_bus.load32(self.program_counter)
     }
-
+    #[allow(dead_code)]
+    #[inline(always)]
     pub fn read_reg(&mut self, register: usize) -> AppResult<u64> {
         if register > CPU_REG_COUNT {
             return Err(AppErrors::OutOfBoundRegister);
         }
         Ok(self.registers[register])
     }
-
+    #[inline(always)]
     pub fn write_reg(&mut self, register: usize, value: u64) -> AppResult<()> {
         if register == 0x0 {
             return Err(AppErrors::RegisterWriteProhibited);
         }
         Ok(self.registers[register] = value)
-    }
-
-    pub fn execute(&mut self, instruction: u32) -> AppResult<()> {
-        // Increase the program counter to lookup the next instruction in the next cycle
-        self.program_counter += DEFAULT_ISNTRUCTION_SIZE_BYTES as u64;
-
-        match InstructionsDecoder::get_op_code(instruction) {
-            CpuInstructionsOpCodes::INT_REG_IMMEDIATE => {
-                let decoded = InstructionsDecoder::decode_i_format_instruction(instruction);
-                self.int_reg_immediate(decoded)
-            }
-            CpuInstructionsOpCodes::ADD => {
-                let decoded = InstructionsDecoder::decode_r_format_instruction(instruction);
-                self.add(decoded)
-            }
-            CpuInstructionsOpCodes::LOAD => {
-                let decoded = InstructionsDecoder::decode_i_format_instruction(instruction);
-                self.load(decoded)
-            }
-            CpuInstructionsOpCodes::STORE => {
-                let decoded = InstructionsDecoder::decode_s_format_instruction(instruction);
-                self.store(decoded)
-            }
-            _ => {
-                dbg!("instruction not implemented");
-                dbg!(instruction);
-                Err(AppErrors::InstructionNotImplemented)
-            }
-        }
     }
 
     pub fn dump_registers(&self) {
