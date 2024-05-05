@@ -1,4 +1,4 @@
-use std::{env, fs::File, io::Read};
+use std::{env, fs::File, io::Read, time::Instant};
 
 use consts::DRAM_SIZE;
 use cpu::Cpu;
@@ -20,19 +20,21 @@ fn main() {
     file.read_to_end(&mut code).unwrap();
 
     let mut cpu = Cpu::new(DRAM_SIZE, code);
-
+    let now = Instant::now();
     loop {
         let instruction = match cpu.fetch_next_instruction() {
             Ok(inst) => inst,
             Err(_) => break,
         };
+        cpu.increase_pc();
         match cpu.execute(instruction) {
             Ok(_) => (),
-            Err(err) => {
-                dbg!(err);
+            Err(_) => {
                 break;
             }
         };
     }
+    let elapsed = now.elapsed();
     cpu.dump_registers();
+    println!("Elapsed: {:.2?}", elapsed);
 }

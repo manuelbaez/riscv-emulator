@@ -4,9 +4,7 @@ use crate::{
     system_bus::SystemBus,
 };
 
-use self::instructions::{
-    decoder, implementations::CpuInstructionsOpCodes, DEFAULT_ISNTRUCTION_SIZE_BYTES,
-};
+use self::instructions::DEFAULT_INSTRUCTION_SIZE_BYTES;
 
 mod cs_registers;
 mod instruction_excecutors;
@@ -16,7 +14,7 @@ const CPU_REG_COUNT: usize = 32;
 
 pub struct Cpu {
     registers: [u64; CPU_REG_COUNT],
-    program_counter: u64,
+    pub program_counter: u64,
     pub system_bus: SystemBus,
     cs_registers: [u64; 4096],
 }
@@ -50,6 +48,10 @@ impl Cpu {
             return Err(AppErrors::RegisterWriteProhibited);
         }
         Ok(self.registers[register] = value)
+    }
+    /// Increase the program counter to lookup the next instruction in the next cycle
+    pub fn increase_pc(&mut self) {
+        self.program_counter += DEFAULT_INSTRUCTION_SIZE_BYTES as u64;
     }
 
     pub fn dump_registers(&self) {

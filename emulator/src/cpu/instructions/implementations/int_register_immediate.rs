@@ -1,7 +1,7 @@
 use crate::{
     cpu::{
         instruction_excecutors::InstructionsExecutor,
-        instructions::decoder::{ITypeDecoder, RdDecoder, Rs1Decoder, UTypeDecoder},
+        instructions::{decoder::{ITypeDecoder, RdDecoder, Rs1Decoder, UTypeDecoder}, DEFAULT_INSTRUCTION_SIZE_BYTES},
         Cpu,
     },
     error::AppResult,
@@ -100,10 +100,18 @@ impl InstructionsExecutor {
         )
     }
 
+    #[inline(always)]
     pub fn lui(cpu: &mut Cpu, instruction: UTypeDecoder) -> AppResult<()> {
+        cpu.write_reg(instruction.get_rd() as usize, instruction.get_imm())
+    }
+
+    #[inline(always)]
+    pub fn auipc(cpu: &mut Cpu, instruction: UTypeDecoder) -> AppResult<()> {
         cpu.write_reg(
             instruction.get_rd() as usize,
-            (instruction.get_imm() as i64).wrapping_shl(12) as u64,
+            cpu.program_counter
+                .wrapping_add(instruction.get_imm())
+                .wrapping_sub(DEFAULT_INSTRUCTION_SIZE_BYTES as u64), //subtract the isntruction size as we move the program counter by that at the begining of the execution
         )
     }
 }

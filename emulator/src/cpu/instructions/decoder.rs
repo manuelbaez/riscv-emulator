@@ -129,10 +129,10 @@ impl UTypeDecoder {
     pub fn new(instruction: u32) -> Self {
         Self { instruction }
     }
-    /// Sign extended imm
+    /// Sign extended imm to u64 with the lower 12-bits set to zero
     #[inline(always)]
     pub fn get_imm(&self) -> u64 {
         // & 0xffff_f000_u32 just in case this mask sets the lower 12 bits to 0
-        ((self.instruction) as i32 as i64).wrapping_shr(12) as u64
+        (self.instruction & 0xffff_f000_u32) as i32 as i64 as u64
     }
 }

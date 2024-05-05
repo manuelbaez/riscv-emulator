@@ -1,5 +1,3 @@
-use std::fmt::Error;
-
 use crate::{
     cpu::instructions::decoder::OpcodeDecoder,
     error::{AppErrors, AppResult},
@@ -9,19 +7,15 @@ use crate::{
 use super::{
     instructions::{
         decoder::{
-            self, Funct3Decoder, ITypeDecoder, RTypeDecoder, RdDecoder, Rs1Decoder, Rs2Decoder,
-            STypeDecoder, UTypeDecoder,
+            self, Funct3Decoder, Funct7Decoder, ITypeDecoder, RTypeDecoder, RdDecoder, Rs1Decoder,
+            Rs2Decoder, STypeDecoder, UTypeDecoder,
         },
         implementations::{CpuInstructionsOpCodes, SubFunctions},
-        DEFAULT_ISNTRUCTION_SIZE_BYTES,
     },
     Cpu,
 };
 impl Cpu {
     pub fn execute(&mut self, instruction: u32) -> AppResult<()> {
-        // Increase the program counter to lookup the next instruction in the next cycle
-        self.program_counter += DEFAULT_ISNTRUCTION_SIZE_BYTES as u64;
-
         match decoder::get_op_code(instruction) {
             CpuInstructionsOpCodes::INT_REG_IMMEDIATE => {
                 let decoder = ITypeDecoder::new(instruction);
@@ -56,11 +50,22 @@ impl Cpu {
             CpuInstructionsOpCodes::INT_REG_IMMEDIATE_LUI => {
                 InstructionsExecutor::lui(self, UTypeDecoder::new(instruction))
             }
-            CpuInstructionsOpCodes::INT_REG_IMMEDIATE_AUIPC => { Err(AppErrors::FuctionNotImplemented)}
-            CpuInstructionsOpCodes::ADD => {
+            CpuInstructionsOpCodes::INT_REG_IMMEDIATE_AUIPC => {
+                InstructionsExecutor::auipc(self, UTypeDecoder::new(instruction))
+            }
+            CpuInstructionsOpCodes::INT_REG_REG => {
                 let decoder = RTypeDecoder::new(instruction);
-                match decoder.get_funct3() {
-                    0x00 => InstructionsExecutor::add(self, decoder),
+                match (decoder.get_funct3(), decoder.get_funct7()) {
+                    SubFunctions::ADD => InstructionsExecutor::add(self, decoder),
+                    SubFunctions::SUB => InstructionsExecutor::sub(self, decoder),
+                    SubFunctions::SLT => InstructionsExecutor::slt(self, decoder),
+                    SubFunctions::SLTU => InstructionsExecutor::sltu(self, decoder),
+                    SubFunctions::AND => InstructionsExecutor::and(self, decoder),
+                    SubFunctions::OR => InstructionsExecutor::or(self, decoder),
+                    SubFunctions::XOR => InstructionsExecutor::xor(self, decoder),
+                    SubFunctions::SLL => InstructionsExecutor::sll(self, decoder),
+                    SubFunctions::SRL => InstructionsExecutor::srl(self, decoder),
+                    SubFunctions::SRA => InstructionsExecutor::sra(self, decoder),
                     _ => Err(AppErrors::FuctionNotImplemented),
                 }
             }
@@ -135,8 +140,8 @@ impl Cpu {
                 }
             }
             _ => {
-                dbg!("instruction not implemented");
-                dbg!(instruction);
+                // dbg!("instruction not implemented");
+                // dbg!(instruction);
                 Err(AppErrors::InstructionNotImplemented)
             }
         }

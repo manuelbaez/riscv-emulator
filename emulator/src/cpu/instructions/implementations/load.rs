@@ -1,10 +1,4 @@
-use crate::{
-    cpu::{
-        instructions::decoder::{Funct3Decoder, ITypeDecoder, RdDecoder, Rs1Decoder},
-        Cpu,
-    },
-    error::{AppErrors, AppResult},
-};
+use crate::cpu::Cpu;
 
 use super::SubFunctions;
 

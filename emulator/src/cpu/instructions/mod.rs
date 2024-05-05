@@ -1,3 +1,3 @@
 pub mod decoder;
 pub mod implementations;
-pub const DEFAULT_ISNTRUCTION_SIZE_BYTES: usize = 4;
+pub const DEFAULT_INSTRUCTION_SIZE_BYTES: usize = 4;

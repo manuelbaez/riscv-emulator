@@ -10,7 +10,7 @@ impl CpuInstructionsOpCodes {
     pub const INT_REG_IMMEDIATE: u8 = 0x13;
     pub const INT_REG_IMMEDIATE_LUI: u8 = 0x37;
     pub const INT_REG_IMMEDIATE_AUIPC: u8 = 0x17;
-    pub const ADD: u8 = 0x33;
+    pub const INT_REG_REG: u8 = 0x33;
     pub const LOAD: u8 = 0x03;
     pub const STORE: u8 = 0x23;
 }
