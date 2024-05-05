@@ -44,10 +44,9 @@ impl Cpu {
     }
     #[inline(always)]
     pub fn write_reg(&mut self, register: usize, value: u64) -> AppResult<()> {
-        if register == 0x0 {
-            return Err(AppErrors::RegisterWriteProhibited);
-        }
-        Ok(self.registers[register] = value)
+        self.registers[register] = value;
+        self.registers[0] = 0;
+        Ok(())
     }
     /// Increase the program counter to lookup the next instruction in the next cycle
     pub fn increase_pc(&mut self) {

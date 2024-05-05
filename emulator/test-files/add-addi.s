@@ -10,5 +10,7 @@ main:
   sltiu a1, t2, 8
   sltiu a5, t2, -8
   slti s3, t2, 8
-  sub a0, t1, a1
+  sub a0, t1, a1 
+  add a5, a5, a1 
+  jal s4, 12 
   

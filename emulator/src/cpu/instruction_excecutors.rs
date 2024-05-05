@@ -7,8 +7,8 @@ use crate::{
 use super::{
     instructions::{
         decoder::{
-            self, Funct3Decoder, Funct7Decoder, ITypeDecoder, RTypeDecoder, RdDecoder, Rs1Decoder,
-            Rs2Decoder, STypeDecoder, UTypeDecoder,
+            self, Funct3Decoder, Funct7Decoder, ITypeDecoder, JTypeDecoder, RTypeDecoder,
+            RdDecoder, Rs1Decoder, Rs2Decoder, STypeDecoder, UTypeDecoder,
         },
         implementations::{CpuInstructionsOpCodes, SubFunctions},
     },
@@ -138,6 +138,9 @@ impl Cpu {
                     ),
                     _ => Err(AppErrors::FuctionNotImplemented),
                 }
+            }
+            CpuInstructionsOpCodes::JAL => {
+                InstructionsExecutor::jal(self, JTypeDecoder::new(instruction))
             }
             _ => {
                 // dbg!("instruction not implemented");
