@@ -29,7 +29,9 @@ fn main() {
         cpu.increase_pc();
         match cpu.execute(instruction) {
             Ok(_) => (),
-            Err(_) => {
+            Err(err) => {
+                // dbg!(err);
+                // dbg!(instruction);
                 break;
             }
         };
