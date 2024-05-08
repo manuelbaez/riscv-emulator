@@ -139,8 +139,11 @@ impl Cpu {
                     _ => Err(AppErrors::FuctionNotImplemented),
                 }
             }
-            CpuInstructionsOpCodes::JAL => {
+            CpuInstructionsOpCodes::CONTROL_JAL => {
                 InstructionsExecutor::jal(self, JTypeDecoder::new(instruction))
+            }
+            CpuInstructionsOpCodes::CONTROL_JALR => {
+                InstructionsExecutor::jalr(self, ITypeDecoder::new(instruction))
             }
             _ => {
                 // dbg!("instruction not implemented");

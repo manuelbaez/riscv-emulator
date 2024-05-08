@@ -12,5 +12,15 @@ main:
   slti s3, t2, 8
   sub a0, t1, a1 
   add a5, a5, a1 
-  # jal s4, 12 
+  call calc
+  addi s7, x0, 1
+  jalr x0, sp, -4 # End the program, for now...
+  ret
+
+notexec:
+  addi s11, x0, 5
+
+calc:
+  addi t6, x0, 5
+  ret
   

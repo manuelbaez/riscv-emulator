@@ -26,12 +26,12 @@ fn main() {
             Ok(inst) => inst,
             Err(_) => break,
         };
-        cpu.increase_pc();
+        cpu.increase_program_counter();
         match cpu.execute(instruction) {
             Ok(_) => (),
             Err(err) => {
-                // dbg!(err);
-                // dbg!(instruction);
+                dbg!(err);
+                dbg!(instruction);
                 break;
             }
         };

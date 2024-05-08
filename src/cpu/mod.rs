@@ -14,7 +14,7 @@ const CPU_REG_COUNT: usize = 32;
 
 pub struct Cpu {
     registers: [u64; CPU_REG_COUNT],
-    pub program_counter: u64,
+    program_counter: u64,
     pub system_bus: SystemBus,
     cs_registers: [u64; 4096],
 }
@@ -49,10 +49,11 @@ impl Cpu {
         Ok(())
     }
     /// Increase the program counter to lookup the next instruction in the next cycle
-    pub fn increase_pc(&mut self) {
+    #[inline(always)]
+    pub fn increase_program_counter(&mut self) {
         self.program_counter += DEFAULT_INSTRUCTION_SIZE_BYTES as u64;
     }
-
+    // TODO: Later reimplement this, copied from RISC-V emulator rust book
     pub fn dump_registers(&self) {
         let mut output = String::from("");
         let abi = [
