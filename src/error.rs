@@ -12,9 +12,9 @@ pub enum AppErrors {
     #[error("Cannot memmory thats out of bounds")]
     OutOfBoundsPointer,
     #[error("Instruction is not supported yet")]
-    InstructionNotImplemented,
+    InstructionNotImplemented(u8),
     #[error("Instruction function is not supported yet")]
-    FuctionNotImplemented,
+    FuctionNotImplemented(u8, Option<u8>),
     #[error("unknown error ocurred")]
     Unknown,
 }

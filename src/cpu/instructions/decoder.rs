@@ -140,14 +140,12 @@ impl UTypeDecoder {
 pub struct JTypeDecoder {
     instruction: u32,
 }
-
 impl InstructionGetter for JTypeDecoder {
     #[inline(always)]
     fn get_raw_instruction(&self) -> u32 {
         self.instruction
     }
 }
-
 impl RdDecoder for JTypeDecoder {}
 impl JTypeDecoder {
     pub fn new(instruction: u32) -> Self {
@@ -160,5 +158,31 @@ impl JTypeDecoder {
             | (self.instruction & 0xff000) as u64 //Bits [19:12]
             | ((self.instruction & 0x100000) >> 9) as u64 // Bit [11]
             | ((self.instruction & 0x7fe00000) >> 20) as u64 // Bits [10:1]
+    }
+}
+
+pub struct BTypeDecoder {
+    instruction: u32,
+}
+impl InstructionGetter for BTypeDecoder {
+    #[inline(always)]
+    fn get_raw_instruction(&self) -> u32 {
+        self.instruction
+    }
+}
+impl Funct3Decoder for BTypeDecoder {}
+impl Rs1Decoder for BTypeDecoder {}
+impl Rs2Decoder for BTypeDecoder {}
+impl BTypeDecoder {
+    pub fn new(instruction: u32) -> Self {
+        Self { instruction }
+    }
+
+    #[inline(always)]
+    pub fn get_imm(&self) -> u64 {
+        ((self.instruction & 0x8000_0000) as i32 as i64 >> 19) as u64 // Bit [12]
+        | ((self.instruction as u64 & 0x80) << 4) // Bit [11]
+        | ((self.instruction as u64 >> 20) & 0x7e0)   // Bit [10:5];
+        | (self.instruction as u64 >> 7) & 0x1e // Bit [4:1]
     }
 }

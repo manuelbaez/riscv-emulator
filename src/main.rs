@@ -24,7 +24,10 @@ fn main() {
     loop {
         let instruction = match cpu.fetch_next_instruction() {
             Ok(inst) => inst,
-            Err(_) => break,
+            Err(err) => {
+                dbg!(err);
+                break;
+            }
         };
         cpu.increase_program_counter();
         match cpu.execute(instruction) {

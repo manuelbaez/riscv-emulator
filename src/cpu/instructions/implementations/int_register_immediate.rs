@@ -9,7 +9,7 @@ use crate::{
 
 use super::SubFunctions;
 
-///Funct3 field Sub-instructions
+///Funct3/7 field Sub-instructions
 impl SubFunctions {
     //For opcode 0010011(0x13)
     ///Add Immediate

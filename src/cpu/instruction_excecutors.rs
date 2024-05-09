@@ -7,8 +7,8 @@ use crate::{
 use super::{
     instructions::{
         decoder::{
-            self, Funct3Decoder, Funct7Decoder, ITypeDecoder, JTypeDecoder, RTypeDecoder,
-            RdDecoder, Rs1Decoder, Rs2Decoder, STypeDecoder, UTypeDecoder,
+            self, BTypeDecoder, Funct3Decoder, Funct7Decoder, ITypeDecoder, JTypeDecoder,
+            RTypeDecoder, RdDecoder, Rs1Decoder, Rs2Decoder, STypeDecoder, UTypeDecoder,
         },
         implementations::{CpuInstructionsOpCodes, SubFunctions},
     },
@@ -32,19 +32,13 @@ impl Cpu {
                         match (SubFunctions::SRLI_SRAI_F3, variant) {
                             SubFunctions::SRLI => InstructionsExecutor::srli(self, decoder),
                             SubFunctions::SRAI => InstructionsExecutor::srai(self, decoder),
-                            _ => {
-                                dbg!(decoder.get_opcode());
-                                dbg!(decoder.get_funct3());
-                                dbg!(variant);
-                                Err(AppErrors::FuctionNotImplemented)
-                            }
+                            _ => Err(AppErrors::FuctionNotImplemented(
+                                decoder.get_funct3(),
+                                Some(variant),
+                            )),
                         }
                     }
-                    _ => {
-                        dbg!(decoder.get_opcode());
-                        dbg!(decoder.get_funct3());
-                        Err(crate::error::AppErrors::InstructionNotImplemented)
-                    }
+                    _ => Err(AppErrors::FuctionNotImplemented(decoder.get_funct3(), None)),
                 }
             }
             CpuInstructionsOpCodes::INT_REG_IMMEDIATE_LUI => {
@@ -53,7 +47,7 @@ impl Cpu {
             CpuInstructionsOpCodes::INT_REG_IMMEDIATE_AUIPC => {
                 InstructionsExecutor::auipc(self, UTypeDecoder::new(instruction))
             }
-            CpuInstructionsOpCodes::INT_REG_REG => {
+            CpuInstructionsOpCodes::INT_REG_REG_RV32I => {
                 let decoder = RTypeDecoder::new(instruction);
                 match (decoder.get_funct3(), decoder.get_funct7()) {
                     SubFunctions::ADD => InstructionsExecutor::add(self, decoder),
@@ -66,7 +60,10 @@ impl Cpu {
                     SubFunctions::SLL => InstructionsExecutor::sll(self, decoder),
                     SubFunctions::SRL => InstructionsExecutor::srl(self, decoder),
                     SubFunctions::SRA => InstructionsExecutor::sra(self, decoder),
-                    _ => Err(AppErrors::FuctionNotImplemented),
+                    _ => Err(AppErrors::FuctionNotImplemented(
+                        decoder.get_funct3(),
+                        Some(decoder.get_funct7()),
+                    )),
                 }
             }
             CpuInstructionsOpCodes::LOAD => {
@@ -108,7 +105,7 @@ impl Cpu {
                         Ok(value) => self.write_reg(decoder.get_rd() as usize, value as u64),
                         Err(err) => Err(err),
                     },
-                    _ => Err(AppErrors::FuctionNotImplemented),
+                    _ => Err(AppErrors::FuctionNotImplemented(decoder.get_funct3(), None)),
                 }
             }
             CpuInstructionsOpCodes::STORE => {
@@ -136,7 +133,7 @@ impl Cpu {
                         MemoryOpSize::B64,
                         self.registers[decoder.get_rs2() as usize],
                     ),
-                    _ => Err(AppErrors::FuctionNotImplemented),
+                    _ => Err(AppErrors::FuctionNotImplemented(decoder.get_funct3(), None)),
                 }
             }
             CpuInstructionsOpCodes::CONTROL_JAL => {
@@ -145,11 +142,45 @@ impl Cpu {
             CpuInstructionsOpCodes::CONTROL_JALR => {
                 InstructionsExecutor::jalr(self, ITypeDecoder::new(instruction))
             }
-            _ => {
-                // dbg!("instruction not implemented");
-                // dbg!(instruction);
-                Err(AppErrors::InstructionNotImplemented)
+            CpuInstructionsOpCodes::CONDITIONAL_BRANCHES => {
+                let decoder = BTypeDecoder::new(instruction);
+                match decoder.get_funct3() {
+                    SubFunctions::BEQ => InstructionsExecutor::beq(self, decoder),
+                    SubFunctions::BNE => InstructionsExecutor::bne(self, decoder),
+                    _ => Err(AppErrors::FuctionNotImplemented(decoder.get_funct3(), None)),
+                }
             }
+            CpuInstructionsOpCodes::INT_REG_IMMEDIATE_RV64I => {
+                let decoder = RTypeDecoder::new(instruction);
+                let funct7 = if decoder.get_funct3() == SubFunctions::ADDIW.0 {
+                    0x00
+                } else {
+                    decoder.get_funct7()
+                };
+                match (decoder.get_funct3(), funct7) {
+                    SubFunctions::ADDIW => {
+                        InstructionsExecutor::addiw(self, ITypeDecoder::new(instruction))
+                    }
+                    _ => Err(AppErrors::FuctionNotImplemented(
+                        decoder.get_funct3(),
+                        Some(decoder.get_funct7()),
+                    )),
+                }
+            }
+            CpuInstructionsOpCodes::INT_REG_REG_RV64I => {
+                let decoder = RTypeDecoder::new(instruction);
+                match (decoder.get_funct3(), decoder.get_funct7()) {
+                    SubFunctions::ADDW => InstructionsExecutor::addw(self, decoder),
+                    SubFunctions::SUBW => InstructionsExecutor::subw(self, decoder),
+                    _ => Err(AppErrors::FuctionNotImplemented(
+                        decoder.get_funct3(),
+                        Some(decoder.get_funct7()),
+                    )),
+                }
+            }
+            _ => Err(AppErrors::InstructionNotImplemented(decoder::get_op_code(
+                instruction,
+            ))),
         }
     }
 }

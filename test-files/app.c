@@ -2,6 +2,13 @@ int main()
 {
     int a = 5;
     int b = 2;
+    if (a != b)
+    {
+        b = 3;
+    }
+    if (a==b){
+        a=5;
+    }
     int c = calculate();
     return a + b + c;
 }
