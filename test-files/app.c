@@ -6,8 +6,17 @@ int main()
     {
         b = 3;
     }
-    if (a==b){
-        a=5;
+    if (a == b)
+    {
+        a = 5;
+    }
+    if (a < b)
+    {
+        a = 7;
+    }
+    if (a >= b)
+    {
+        a = 8;
     }
     int c = calculate();
     return a + b + c;
