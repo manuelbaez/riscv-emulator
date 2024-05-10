@@ -1,5 +1,4 @@
 use crate::{
-    cpu::instructions::decoder::OpcodeDecoder,
     error::{AppErrors, AppResult},
     memory::MemoryOpSize,
 };
@@ -147,6 +146,10 @@ impl Cpu {
                 match decoder.get_funct3() {
                     SubFunctions::BEQ => InstructionsExecutor::beq(self, decoder),
                     SubFunctions::BNE => InstructionsExecutor::bne(self, decoder),
+                    SubFunctions::BLT => InstructionsExecutor::blt(self, decoder),
+                    SubFunctions::BLTU => InstructionsExecutor::bltu(self, decoder),
+                    SubFunctions::BGE => InstructionsExecutor::bge(self, decoder),
+                    SubFunctions::BGEU => InstructionsExecutor::bgeu(self, decoder),
                     _ => Err(AppErrors::FuctionNotImplemented(decoder.get_funct3(), None)),
                 }
             }

@@ -7,6 +7,7 @@ pub fn get_op_code(instruction: u32) -> u8 {
 pub trait InstructionGetter {
     fn get_raw_instruction(&self) -> u32;
 }
+#[allow(dead_code)]
 pub trait OpcodeDecoder: InstructionGetter {
     #[inline(always)]
     fn get_opcode(&self) -> u8 {
