@@ -24,7 +24,7 @@ int main()
 
 int calculate()
 {
-    int var_a = 10;
-    int var_b = 20;
+    long var_a = 10;
+    long var_b = 20;
     return var_a + var_b;
 }

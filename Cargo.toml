@@ -3,6 +3,10 @@ name = "riscvemulator"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+default = []
+debug = []
+
 [profile.release]
 opt-level = 3
 debug = false

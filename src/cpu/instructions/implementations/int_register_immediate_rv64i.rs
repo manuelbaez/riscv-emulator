@@ -17,8 +17,10 @@ impl SubFunctions {
 impl InstructionsExecutor {
     #[inline(always)]
     pub fn addiw(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
-        let value = cpu.registers[instruction.get_rs1() as usize]
-            .wrapping_add(instruction.get_imm() as i32 as i64 as u64);
-        cpu.write_reg(instruction.get_rd() as usize, value)
+        cpu.write_reg(
+            instruction.get_rd() as usize,
+            cpu.registers[instruction.get_rs1() as usize].wrapping_add(instruction.get_imm()) as i32
+                as i64 as u64,
+        )
     }
 }

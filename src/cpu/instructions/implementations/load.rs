@@ -1,7 +1,7 @@
 use crate::{
     cpu::{
         instruction_excecutors::InstructionsExecutor,
-        instructions::decoder::{self, Funct3Decoder, ITypeDecoder, RdDecoder, Rs1Decoder},
+        instructions::decoder::{Funct3Decoder, ITypeDecoder, RdDecoder, Rs1Decoder},
         Cpu,
     },
     error::{AppErrors, AppResult},
@@ -61,9 +61,10 @@ impl InstructionsExecutor {
                 Ok(value) => cpu.write_reg(decoder.get_rd() as usize, value as u64),
                 Err(err) => Err(err),
             },
-            _ => Err(AppErrors::InstructionNotImplemented(decoder::get_op_code(
+            _ => Err(AppErrors::InstructionNotImplemented {
+                pc: cpu.get_program_counter(),
                 instruction,
-            ))),
+            }),
         }
     }
 }

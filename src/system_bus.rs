@@ -27,6 +27,7 @@ impl SystemBus {
         }
     }
 
+    #[inline(always)]
     pub fn load8(&self, addr: u64) -> AppResult<u8> {
         match addr.cmp(&DRAM_BASE_ADDR) {
             Ordering::Less => Err(AppErrors::AddressNotFound),
@@ -34,6 +35,7 @@ impl SystemBus {
         }
     }
 
+    #[inline(always)]
     pub fn load16(&self, addr: u64) -> AppResult<u16> {
         match addr.cmp(&DRAM_BASE_ADDR) {
             Ordering::Less => Err(AppErrors::AddressNotFound),
@@ -41,6 +43,7 @@ impl SystemBus {
         }
     }
 
+    #[inline(always)]
     pub fn load32(&self, addr: u64) -> AppResult<u32> {
         match addr.cmp(&DRAM_BASE_ADDR) {
             Ordering::Less => Err(AppErrors::AddressNotFound),
@@ -48,6 +51,7 @@ impl SystemBus {
         }
     }
 
+    #[inline(always)]
     pub fn load64(&self, addr: u64) -> AppResult<u64> {
         match addr.cmp(&DRAM_BASE_ADDR) {
             Ordering::Less => Err(AppErrors::AddressNotFound),
@@ -55,6 +59,7 @@ impl SystemBus {
         }
     }
 
+    #[inline(always)]
     pub fn store(&mut self, addr: u64, size: BusOpSize, value: u64) -> AppResult<()> {
         match addr.cmp(&DRAM_BASE_ADDR) {
             Ordering::Less => Err(AppErrors::AddressNotFound),

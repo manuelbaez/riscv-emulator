@@ -9,10 +9,10 @@ pub enum AppErrors {
     OutOfBoundRegister,
     #[error("Cannot access specified address")]
     AddressNotFound,
-    #[error("Cannot memmory thats out of bounds")]
+    #[error("Cannot access memmory thats out of bounds")]
     OutOfBoundsPointer,
     #[error("Instruction is not supported yet")]
-    InstructionNotImplemented(u8),
+    InstructionNotImplemented { pc: u64, instruction: u32 },
     #[error("Instruction function is not supported yet")]
     FuctionNotImplemented(u8, Option<u8>),
     #[error("unknown error ocurred")]

@@ -7,7 +7,7 @@ use super::{
     instructions::{
         decoder::{
             self, BTypeDecoder, Funct3Decoder, Funct7Decoder, ITypeDecoder, JTypeDecoder,
-            RTypeDecoder, RdDecoder, Rs1Decoder, Rs2Decoder, STypeDecoder, UTypeDecoder,
+            RTypeDecoder, Rs1Decoder, Rs2Decoder, STypeDecoder, UTypeDecoder,
         },
         implementations::{CpuInstructionsOpCodes, SubFunctions},
     },
@@ -140,9 +140,10 @@ impl Cpu {
                     )),
                 }
             }
-            _ => Err(AppErrors::InstructionNotImplemented(decoder::get_op_code(
+            _ => Err(AppErrors::InstructionNotImplemented {
+                pc: self.get_program_counter(),
                 instruction,
-            ))),
+            }),
         }
     }
 }

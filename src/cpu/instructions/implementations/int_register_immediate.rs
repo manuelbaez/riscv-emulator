@@ -1,7 +1,10 @@
 use crate::{
     cpu::{
         instruction_excecutors::InstructionsExecutor,
-        instructions::{decoder::{ITypeDecoder, RdDecoder, Rs1Decoder, UTypeDecoder}, DEFAULT_INSTRUCTION_SIZE_BYTES},
+        instructions::{
+            decoder::{ITypeDecoder, RdDecoder, Rs1Decoder, UTypeDecoder},
+            DEFAULT_INSTRUCTION_SIZE_BYTES,
+        },
         Cpu,
     },
     error::AppResult,
@@ -31,9 +34,11 @@ impl SubFunctions {
 impl InstructionsExecutor {
     #[inline(always)]
     pub fn addi(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
-        let value = cpu.registers[instruction.get_rs1() as usize]
-            .wrapping_add(instruction.get_imm() as u64);
-        cpu.write_reg(instruction.get_rd() as usize, value)
+        cpu.write_reg(
+            instruction.get_rd() as usize,
+            cpu.registers[instruction.get_rs1() as usize]
+                .wrapping_add(instruction.get_imm() as u64),
+        )
     }
 
     #[inline(always)]
@@ -111,7 +116,8 @@ impl InstructionsExecutor {
             instruction.get_rd() as usize,
             cpu.program_counter
                 .wrapping_add(instruction.get_imm())
-                .wrapping_sub(DEFAULT_INSTRUCTION_SIZE_BYTES as u64), //subtract the isntruction size as we move the program counter by that at the begining of the execution
+                //subtract the isntruction size as we move the program counter by that at the begining of the execution
+                .wrapping_sub(DEFAULT_INSTRUCTION_SIZE_BYTES as u64), 
         )
     }
 }
