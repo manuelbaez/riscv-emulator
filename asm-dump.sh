@@ -1,1 +1,1 @@
-/opt/riscv/riscv64-unknown-linux-gnu/bin/objdump  -D ./test-files/app.elf
+/opt/riscv/riscv64-unknown-linux-gnu/bin/objdump  -D ./tests/app.elf

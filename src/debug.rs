@@ -27,7 +27,7 @@ pub fn init_debug_print_thread_channel() -> (JoinHandle<()>, Sender<DebugMessage
                 registers,
             } => {
                 let sp = registers[2];
-                println!("{time_elapsed_ns}ns - {pc:0x}: {instruction:0x} - sp: {sp:0x}");
+                println!("{pc:0x}: {instruction:06x} - {time_elapsed_ns}ns ");
             }
             DebugMessages::DumpRegisters(registers) => dump_registers(registers),
             DebugMessages::Terminate => break,

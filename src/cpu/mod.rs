@@ -54,6 +54,7 @@ impl Cpu {
         self.program_counter += DEFAULT_INSTRUCTION_SIZE_BYTES as u64;
     }
 
+    #[inline(always)]
     pub fn get_program_counter(&mut self) -> u64 {
         self.program_counter
     }

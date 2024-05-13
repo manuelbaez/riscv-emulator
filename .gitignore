@@ -4,3 +4,4 @@
 **/Cargo.lock
 **/*.bin
 **/*.elf
+tests/**/*.txt

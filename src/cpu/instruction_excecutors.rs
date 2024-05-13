@@ -140,10 +140,7 @@ impl Cpu {
                     )),
                 }
             }
-            _ => Err(AppErrors::InstructionNotImplemented {
-                pc: self.get_program_counter(),
-                instruction,
-            }),
+            _ => Err(AppErrors::InstructionNotImplemented { instruction }),
         }
     }
 }

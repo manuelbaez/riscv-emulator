@@ -45,25 +45,23 @@ fn main() {
                 break;
             }
         };
-        #[cfg(feature = "debug")]
+        // #[cfg(feature = "debug")]
         let fetched_pc = cpu.get_program_counter();
 
         cpu.increase_program_counter();
         match cpu.execute(instruction) {
             Ok(_) => (),
             Err(err) => {
-                let program_counter = cpu.get_program_counter();
-                eprintln!("{program_counter:0x}: {instruction:0x} {err}");
+                eprintln!("{fetched_pc:0x}: {instruction:0x} {err}");
                 break;
             }
         };
 
         #[cfg(feature = "debug")]
         {
-            let elapsed: u128 = now.elapsed().as_nanos();
             debug_tx
                 .send(DebugMessages::InstructionExecution {
-                    time_elapsed_ns: elapsed - debug_cycle_start,
+                    time_elapsed_ns: now.elapsed().as_nanos() - debug_cycle_start,
                     pc: fetched_pc,
                     instruction,
                     registers: cpu.get_registers(),
@@ -80,9 +78,9 @@ fn main() {
         debug_tx.send(DebugMessages::Terminate).unwrap();
         loop {
             if debug_thread_handle.is_finished() {
-                thread::sleep(Duration::from_millis(100));
                 break;
             };
+            thread::sleep(Duration::from_millis(100));
         }
     }
     println!("Total Execution time: {:.2?}", run_time);

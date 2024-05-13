@@ -12,19 +12,19 @@ use super::SubFunctions;
 ///Funct3 field Sub-instructions
 impl SubFunctions {
     /// Load Byte
-    pub const LB: u8 = 0x0;
+    pub const LB: u8 = 0b000;
     /// Load Half Word (16-bit)
-    pub const LH: u8 = 0x1;
+    pub const LH: u8 = 0b001;
     /// Load Word (32-bit)
-    pub const LW: u8 = 0x2;
+    pub const LW: u8 = 0b010;
     /// Load Double Word (64-bit)
-    pub const LD: u8 = 0x3;
+    pub const LD: u8 = 0b011;
     /// Load Byte Usigned
-    pub const LBU: u8 = 0x4;
+    pub const LBU: u8 = 0b100;
     /// Load Half Word Unsigned (16-bit)
-    pub const LHU: u8 = 0x5;
+    pub const LHU: u8 = 0b101;
     /// Load Word Unsigned (32-bit)
-    pub const LWU: u8 = 0x6;
+    pub const LWU: u8 = 0b110;
 }
 
 impl InstructionsExecutor {
@@ -61,10 +61,7 @@ impl InstructionsExecutor {
                 Ok(value) => cpu.write_reg(decoder.get_rd() as usize, value as u64),
                 Err(err) => Err(err),
             },
-            _ => Err(AppErrors::InstructionNotImplemented {
-                pc: cpu.get_program_counter(),
-                instruction,
-            }),
+            _ => Err(AppErrors::InstructionNotImplemented { instruction }),
         }
     }
 }

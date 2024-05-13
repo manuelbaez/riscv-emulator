@@ -11,8 +11,8 @@ pub enum AppErrors {
     AddressNotFound,
     #[error("Cannot access memmory thats out of bounds")]
     OutOfBoundsPointer,
-    #[error("Instruction is not supported yet")]
-    InstructionNotImplemented { pc: u64, instruction: u32 },
+    #[error("Instruction is not supported")]
+    InstructionNotImplemented { instruction: u32 },
     #[error("Instruction function is not supported yet")]
     FuctionNotImplemented(u8, Option<u8>),
     #[error("unknown error ocurred")]
