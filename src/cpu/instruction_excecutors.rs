@@ -10,11 +10,10 @@ use super::{
             RTypeDecoder, Rs1Decoder, Rs2Decoder, STypeDecoder, UTypeDecoder,
         },
         implementations::{CpuInstructionsOpCodes, SubFunctions},
-    },
-    Cpu,
+    }, side_effects::OperationSideEffect, Cpu
 };
 impl Cpu {
-    pub fn execute(&mut self, instruction: u32) -> AppResult<()> {
+    pub fn execute(&mut self, instruction: u32) -> AppResult<OperationSideEffect> {
         match decoder::get_op_code(instruction) {
             CpuInstructionsOpCodes::INT_REG_IMMEDIATE => {
                 let decoder = ITypeDecoder::new(instruction);
@@ -71,26 +70,38 @@ impl Cpu {
                 let addr: u64 =
                     self.registers[decoder.get_rs1() as usize].wrapping_add(decoder.get_imm());
                 match decoder.get_funct3() {
-                    SubFunctions::SB => self.system_bus.store(
-                        addr,
-                        MemoryOpSize::B8,
-                        self.registers[decoder.get_rs2() as usize],
-                    ),
-                    SubFunctions::SH => self.system_bus.store(
-                        addr,
-                        MemoryOpSize::B16,
-                        self.registers[decoder.get_rs2() as usize],
-                    ),
-                    SubFunctions::SW => self.system_bus.store(
-                        addr,
-                        MemoryOpSize::B32,
-                        self.registers[decoder.get_rs2() as usize],
-                    ),
-                    SubFunctions::SD => self.system_bus.store(
-                        addr,
-                        MemoryOpSize::B64,
-                        self.registers[decoder.get_rs2() as usize],
-                    ),
+                    SubFunctions::SB => self
+                        .system_bus
+                        .store(
+                            addr,
+                            MemoryOpSize::B8,
+                            self.registers[decoder.get_rs2() as usize],
+                        )
+                        .map(|_| OperationSideEffect::None),
+                    SubFunctions::SH => self
+                        .system_bus
+                        .store(
+                            addr,
+                            MemoryOpSize::B16,
+                            self.registers[decoder.get_rs2() as usize],
+                        )
+                        .map(|_| OperationSideEffect::None),
+                    SubFunctions::SW => self
+                        .system_bus
+                        .store(
+                            addr,
+                            MemoryOpSize::B32,
+                            self.registers[decoder.get_rs2() as usize],
+                        )
+                        .map(|_| OperationSideEffect::None),
+                    SubFunctions::SD => self
+                        .system_bus
+                        .store(
+                            addr,
+                            MemoryOpSize::B64,
+                            self.registers[decoder.get_rs2() as usize],
+                        )
+                        .map(|_| OperationSideEffect::None),
                     _ => Err(AppErrors::FuctionNotImplemented(decoder.get_funct3(), None)),
                 }
             }
@@ -138,6 +149,17 @@ impl Cpu {
                         decoder.get_funct3(),
                         Some(decoder.get_funct7()),
                     )),
+                }
+            }
+            CpuInstructionsOpCodes::MEM_ORDERING => {
+                let decoder = ITypeDecoder::new(instruction);
+                match decoder.get_funct3() {
+                    SubFunctions::FENCE => {
+                        //Not necesary for the moment being,since
+                        //this is an in-order execution emulator
+                        Ok(OperationSideEffect::None)
+                    }
+                    _ => Err(AppErrors::InstructionNotImplemented { instruction }),
                 }
             }
             _ => Err(AppErrors::InstructionNotImplemented { instruction }),

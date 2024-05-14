@@ -2,6 +2,7 @@ use crate::{
     cpu::{
         instruction_excecutors::InstructionsExecutor,
         instructions::decoder::{Funct3Decoder, ITypeDecoder, RdDecoder, Rs1Decoder},
+        side_effects::OperationSideEffect,
         Cpu,
     },
     error::{AppErrors, AppResult},
@@ -29,7 +30,7 @@ impl SubFunctions {
 
 impl InstructionsExecutor {
     #[inline(always)]
-    pub fn load(cpu: &mut Cpu, instruction: u32) -> AppResult<()> {
+    pub fn load(cpu: &mut Cpu, instruction: u32) -> AppResult<OperationSideEffect> {
         let decoder = ITypeDecoder::new(instruction);
         let addr: u64 = cpu.registers[decoder.get_rs1() as usize].wrapping_add(decoder.get_imm());
         match decoder.get_funct3() {

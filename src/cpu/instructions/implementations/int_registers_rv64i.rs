@@ -2,6 +2,7 @@ use crate::{
     cpu::{
         instruction_excecutors::InstructionsExecutor,
         instructions::decoder::{RTypeDecoder, RdDecoder, Rs1Decoder, Rs2Decoder},
+        side_effects::OperationSideEffect,
         Cpu,
     },
     error::AppResult,
@@ -17,10 +18,10 @@ impl SubFunctions {
 impl InstructionsExecutor {
     /// Adds the value held on rs2 to rs1 and sets to rd:
     /// rd = rs1 + rs2
-    /// This instruction only sets the lower 32 bits and 
+    /// This instruction only sets the lower 32 bits and
     /// sign extends the value to 64
     #[inline(always)]
-    pub fn addw(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<()> {
+    pub fn addw(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
             instruction.get_rd() as usize,
             cpu.registers[instruction.get_rs1() as usize]
@@ -30,10 +31,10 @@ impl InstructionsExecutor {
     }
     /// Substract the value held on rs2 to rs1 and sets to rd:
     /// rd = rs1 - rs2
-    /// This instruction only sets the lower 32 bits and 
+    /// This instruction only sets the lower 32 bits and
     /// sign extends the value to 64
     #[inline(always)]
-    pub fn subw(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<()> {
+    pub fn subw(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
             instruction.get_rd() as usize,
             cpu.registers[instruction.get_rs1() as usize]

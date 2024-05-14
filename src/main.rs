@@ -6,6 +6,7 @@ use cpu::Cpu;
 #[cfg(feature = "debug")]
 use std::{thread, time::Duration};
 
+use crate::cpu::side_effects::OperationSideEffect;
 #[cfg(feature = "debug")]
 use crate::debug::{init_debug_print_thread_channel, DebugMessages};
 
@@ -45,17 +46,10 @@ fn main() {
                 break;
             }
         };
+        
         // #[cfg(feature = "debug")]
         let fetched_pc = cpu.get_program_counter();
-
-        cpu.increase_program_counter();
-        match cpu.execute(instruction) {
-            Ok(_) => (),
-            Err(err) => {
-                eprintln!("{fetched_pc:0x}: {instruction:0x} {err}");
-                break;
-            }
-        };
+        let execution_result = cpu.execute(instruction);
 
         #[cfg(feature = "debug")]
         {
@@ -68,7 +62,20 @@ fn main() {
                 })
                 .unwrap();
         }
+
+        match execution_result {
+            Ok(OperationSideEffect::None) => (),
+            Ok(OperationSideEffect::SkipPCIncrease) => {
+                continue;
+            }
+            Err(err) => {
+                eprintln!("{fetched_pc:0x}: {instruction:0x} {err}");
+                break;
+            }
+        };
+        cpu.increase_program_counter();
     }
+
     let run_time = now.elapsed();
     #[cfg(feature = "debug")]
     {

@@ -12,9 +12,9 @@ make distclean
 
 cp ${SOURCE_PATH}/.config ./
 make ARCH=riscv \
-    CONFIG_RISCV_ISA_C=n \
     CROSS_COMPILE=${TOOLCHAIN_BIN_PATH}/bin/riscv64-unknown-linux-gnu- \
     -j$(nproc)
+    # CONFIG_RISCV_ISA_C=n \
     # CONFIG_ARCH_RV64I=y \
     # CFLAGS="-O3" \
 # ${TOOLCHAIN_BIN_PATH}/bin/riscv64-unknown-linux-gnu-objcopy -O binary ./arch/riscv/boot/Image ${SOURCE_PATH}/kernel.bin

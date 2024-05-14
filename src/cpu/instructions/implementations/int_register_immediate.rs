@@ -1,11 +1,8 @@
 use crate::{
     cpu::{
-        instruction_excecutors::InstructionsExecutor,
-        instructions::{
-            decoder::{ITypeDecoder, RdDecoder, Rs1Decoder, UTypeDecoder},
-            DEFAULT_INSTRUCTION_SIZE_BYTES,
-        },
-        Cpu,
+        instruction_excecutors::InstructionsExecutor, instructions::{
+            decoder::{ITypeDecoder, RdDecoder, Rs1Decoder, UTypeDecoder}, DEFAULT_INSTRUCTION_SIZE_BYTES
+        }, side_effects::OperationSideEffect, Cpu
     },
     error::AppResult,
 };
@@ -33,7 +30,7 @@ impl SubFunctions {
 
 impl InstructionsExecutor {
     #[inline(always)]
-    pub fn addi(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+    pub fn addi(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
             instruction.get_rd() as usize,
             cpu.registers[instruction.get_rs1() as usize]
@@ -42,20 +39,20 @@ impl InstructionsExecutor {
     }
 
     #[inline(always)]
-    pub fn slti(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+    pub fn slti(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<OperationSideEffect> {
         let value =
             (cpu.registers[instruction.get_rs1() as usize] as i64) < (instruction.get_imm() as i64);
         cpu.write_reg(instruction.get_rd() as usize, value as u64)
     }
 
     #[inline(always)]
-    pub fn sltiu(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+    pub fn sltiu(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<OperationSideEffect> {
         let value = cpu.registers[instruction.get_rs1() as usize] < instruction.get_imm();
         cpu.write_reg(instruction.get_rd() as usize, value as u64)
     }
 
     #[inline(always)]
-    pub fn ori(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+    pub fn ori(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
             instruction.get_rd() as usize,
             cpu.registers[instruction.get_rs1() as usize] | instruction.get_imm(),
@@ -63,7 +60,7 @@ impl InstructionsExecutor {
     }
 
     #[inline(always)]
-    pub fn xori(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+    pub fn xori(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
             instruction.get_rd() as usize,
             cpu.registers[instruction.get_rs1() as usize] ^ instruction.get_imm(),
@@ -71,7 +68,7 @@ impl InstructionsExecutor {
     }
 
     #[inline(always)]
-    pub fn andi(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+    pub fn andi(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
             instruction.get_rd() as usize,
             cpu.registers[instruction.get_rs1() as usize] & instruction.get_imm(),
@@ -79,7 +76,7 @@ impl InstructionsExecutor {
     }
 
     #[inline(always)]
-    pub fn slli(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+    pub fn slli(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<OperationSideEffect> {
         let shamt = (instruction.get_imm() & 0x3f) as u32; // shamt is encoded in the lower 6bit of the imm for RV64I
         cpu.write_reg(
             instruction.get_rd() as usize,
@@ -88,7 +85,7 @@ impl InstructionsExecutor {
     }
 
     #[inline(always)]
-    pub fn srli(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+    pub fn srli(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<OperationSideEffect> {
         let shamt = (instruction.get_imm() & 0x3f) as u32; // shamt is encoded in the lower 6bit of the imm for RV64I
         cpu.write_reg(
             instruction.get_rd() as usize,
@@ -97,7 +94,7 @@ impl InstructionsExecutor {
     }
 
     #[inline(always)]
-    pub fn srai(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<()> {
+    pub fn srai(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<OperationSideEffect> {
         let shamt = (instruction.get_imm() & 0x3f) as u32; // shamt is encoded in the lower 6bit of the imm for RV64I
         cpu.write_reg(
             instruction.get_rd() as usize,
@@ -106,12 +103,12 @@ impl InstructionsExecutor {
     }
 
     #[inline(always)]
-    pub fn lui(cpu: &mut Cpu, instruction: UTypeDecoder) -> AppResult<()> {
+    pub fn lui(cpu: &mut Cpu, instruction: UTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(instruction.get_rd() as usize, instruction.get_imm())
     }
 
     #[inline(always)]
-    pub fn auipc(cpu: &mut Cpu, instruction: UTypeDecoder) -> AppResult<()> {
+    pub fn auipc(cpu: &mut Cpu, instruction: UTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
             instruction.get_rd() as usize,
             cpu.program_counter

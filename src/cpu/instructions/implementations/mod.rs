@@ -6,6 +6,7 @@ pub mod load;
 pub mod store;
 pub mod int_register_immediate_rv64i;
 pub mod int_registers_rv64i;
+pub mod memory_ordering;
 
 pub struct SubFunctions;
 
@@ -17,6 +18,7 @@ impl CpuInstructionsOpCodes {
     pub const INT_REG_IMMEDIATE_AUIPC: u8 = 0x17;
     pub const INT_REG_REG_RV32I: u8 = 0x33;
     pub const INT_REG_REG_RV64I: u8 = 0b0111011;
+    pub const MEM_ORDERING: u8 = 0b0001111;
     pub const CONDITIONAL_BRANCHES: u8 = 0b1100011;
     pub const CONTROL_JAL: u8 = 0b1101111;
     pub const CONTROL_JALR: u8 = 0b1100111;

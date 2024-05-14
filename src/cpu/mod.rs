@@ -4,11 +4,12 @@ use crate::{
     system_bus::SystemBus,
 };
 
-use self::instructions::DEFAULT_INSTRUCTION_SIZE_BYTES;
+use self::{instructions::DEFAULT_INSTRUCTION_SIZE_BYTES, side_effects::OperationSideEffect};
 
 mod cs_registers;
 mod instruction_excecutors;
 mod instructions;
+pub mod side_effects;
 
 const CPU_REG_COUNT: usize = 32;
 
@@ -43,10 +44,10 @@ impl Cpu {
         Ok(self.registers[register])
     }
     #[inline(always)]
-    pub fn write_reg(&mut self, register: usize, value: u64) -> AppResult<()> {
+    pub fn write_reg(&mut self, register: usize, value: u64) -> AppResult<OperationSideEffect> {
         self.registers[register] = value;
         self.registers[0] = 0;
-        Ok(())
+        Ok(OperationSideEffect::None)
     }
     /// Increase the program counter to lookup the next instruction in the next cycle
     #[inline(always)]
