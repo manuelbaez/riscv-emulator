@@ -10,7 +10,9 @@ use super::{
             RTypeDecoder, Rs1Decoder, Rs2Decoder, STypeDecoder, UTypeDecoder,
         },
         implementations::{CpuInstructionsOpCodes, SubFunctions},
-    }, side_effects::OperationSideEffect, Cpu
+    },
+    side_effects::OperationSideEffect,
+    Cpu,
 };
 impl Cpu {
     pub fn execute(&mut self, instruction: u32) -> AppResult<OperationSideEffect> {
@@ -159,6 +161,14 @@ impl Cpu {
                         //this is an in-order execution emulator
                         Ok(OperationSideEffect::None)
                     }
+                    _ => Err(AppErrors::InstructionNotImplemented { instruction }),
+                }
+            }
+            CpuInstructionsOpCodes::SYSCALLS => {
+                let decoder = ITypeDecoder::new(instruction);
+                match decoder.get_imm() as u16 {
+                    SubFunctions::EBREAK => Ok(OperationSideEffect::TriggerBreakpoint),
+                    SubFunctions::ECALL => Ok(OperationSideEffect::TriggerSyscall),
                     _ => Err(AppErrors::InstructionNotImplemented { instruction }),
                 }
             }

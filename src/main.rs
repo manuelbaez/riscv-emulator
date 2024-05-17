@@ -46,7 +46,7 @@ fn main() {
                 break;
             }
         };
-        
+
         // #[cfg(feature = "debug")]
         let fetched_pc = cpu.get_program_counter();
         let execution_result = cpu.execute(instruction);
@@ -72,6 +72,7 @@ fn main() {
                 eprintln!("{fetched_pc:0x}: {instruction:0x} {err}");
                 break;
             }
+            _ => (),
         };
         cpu.increase_program_counter();
     }

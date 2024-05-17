@@ -1,12 +1,13 @@
 pub mod conditional_branches;
 pub mod control_transfer;
 pub mod int_register_immediate;
-pub mod int_registers;
-pub mod load;
-pub mod store;
 pub mod int_register_immediate_rv64i;
+pub mod int_registers;
 pub mod int_registers_rv64i;
+pub mod load;
 pub mod memory_ordering;
+pub mod store;
+pub mod syscalls;
 
 pub struct SubFunctions;
 
@@ -24,4 +25,5 @@ impl CpuInstructionsOpCodes {
     pub const CONTROL_JALR: u8 = 0b1100111;
     pub const LOAD: u8 = 0x03;
     pub const STORE: u8 = 0x23;
+    pub const SYSCALLS: u8 = 0b1110011;
 }
