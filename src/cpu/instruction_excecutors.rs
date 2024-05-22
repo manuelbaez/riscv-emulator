@@ -1,3 +1,5 @@
+use std::result;
+
 use crate::{
     error::{AppErrors, AppResult},
     memory::MemoryOpSize,
@@ -6,8 +8,10 @@ use crate::{
 use super::{
     instructions::{
         decoder::{
-            self, BTypeDecoder, Funct3Decoder, Funct7Decoder, ITypeDecoder, JTypeDecoder,
-            RTypeDecoder, Rs1Decoder, Rs2Decoder, STypeDecoder, UTypeDecoder,
+            self,
+            b32::{Funct3Decoder, Funct7Decoder, Rs1Decoder, Rs2Decoder},
+            BTypeDecoder, ITypeDecoder, InstructionSize, JTypeDecoder, RTypeDecoder, STypeDecoder,
+            UTypeDecoder,
         },
         implementations::{CpuInstructionsOpCodes, SubFunctions},
     },
@@ -15,11 +19,11 @@ use super::{
     Cpu,
 };
 impl Cpu {
-    pub fn execute(&mut self, instruction: u32) -> AppResult<OperationSideEffect> {
+    fn exec_32bit_instruction(&mut self, instruction: u32) -> AppResult<OperationSideEffect> {
         match decoder::get_op_code(instruction) {
             CpuInstructionsOpCodes::INT_REG_IMMEDIATE => {
                 let decoder = ITypeDecoder::new(instruction);
-                match decoder.get_funct3() {
+                match decoder.get_funct3_field() {
                     SubFunctions::ADDI => InstructionsExecutor::addi(self, decoder),
                     SubFunctions::SLTI => InstructionsExecutor::slti(self, decoder),
                     SubFunctions::SLTIU => InstructionsExecutor::sltiu(self, decoder),
@@ -33,12 +37,15 @@ impl Cpu {
                             SubFunctions::SRLI => InstructionsExecutor::srli(self, decoder),
                             SubFunctions::SRAI => InstructionsExecutor::srai(self, decoder),
                             _ => Err(AppErrors::FuctionNotImplemented(
-                                decoder.get_funct3(),
+                                decoder.get_funct3_field(),
                                 Some(variant),
                             )),
                         }
                     }
-                    _ => Err(AppErrors::FuctionNotImplemented(decoder.get_funct3(), None)),
+                    _ => Err(AppErrors::FuctionNotImplemented(
+                        decoder.get_funct3_field(),
+                        None,
+                    )),
                 }
             }
             CpuInstructionsOpCodes::INT_REG_IMMEDIATE_LUI => {
@@ -49,7 +56,7 @@ impl Cpu {
             }
             CpuInstructionsOpCodes::INT_REG_REG_RV32I => {
                 let decoder = RTypeDecoder::new(instruction);
-                match (decoder.get_funct3(), decoder.get_funct7()) {
+                match (decoder.get_funct3_field(), decoder.get_funct7_field()) {
                     SubFunctions::ADD => InstructionsExecutor::add(self, decoder),
                     SubFunctions::SUB => InstructionsExecutor::sub(self, decoder),
                     SubFunctions::SLT => InstructionsExecutor::slt(self, decoder),
@@ -61,23 +68,23 @@ impl Cpu {
                     SubFunctions::SRL => InstructionsExecutor::srl(self, decoder),
                     SubFunctions::SRA => InstructionsExecutor::sra(self, decoder),
                     _ => Err(AppErrors::FuctionNotImplemented(
-                        decoder.get_funct3(),
-                        Some(decoder.get_funct7()),
+                        decoder.get_funct3_field(),
+                        Some(decoder.get_funct7_field()),
                     )),
                 }
             }
             CpuInstructionsOpCodes::LOAD => InstructionsExecutor::load(self, instruction),
             CpuInstructionsOpCodes::STORE => {
                 let decoder = STypeDecoder::new(instruction);
-                let addr: u64 =
-                    self.registers[decoder.get_rs1() as usize].wrapping_add(decoder.get_imm());
-                match decoder.get_funct3() {
+                let addr: u64 = self.registers[decoder.get_rs1_field() as usize]
+                    .wrapping_add(decoder.get_imm());
+                match decoder.get_funct3_field() {
                     SubFunctions::SB => self
                         .system_bus
                         .store(
                             addr,
                             MemoryOpSize::B8,
-                            self.registers[decoder.get_rs2() as usize],
+                            self.registers[decoder.get_rs2_field() as usize],
                         )
                         .map(|_| OperationSideEffect::None),
                     SubFunctions::SH => self
@@ -85,7 +92,7 @@ impl Cpu {
                         .store(
                             addr,
                             MemoryOpSize::B16,
-                            self.registers[decoder.get_rs2() as usize],
+                            self.registers[decoder.get_rs2_field() as usize],
                         )
                         .map(|_| OperationSideEffect::None),
                     SubFunctions::SW => self
@@ -93,7 +100,7 @@ impl Cpu {
                         .store(
                             addr,
                             MemoryOpSize::B32,
-                            self.registers[decoder.get_rs2() as usize],
+                            self.registers[decoder.get_rs2_field() as usize],
                         )
                         .map(|_| OperationSideEffect::None),
                     SubFunctions::SD => self
@@ -101,10 +108,13 @@ impl Cpu {
                         .store(
                             addr,
                             MemoryOpSize::B64,
-                            self.registers[decoder.get_rs2() as usize],
+                            self.registers[decoder.get_rs2_field() as usize],
                         )
                         .map(|_| OperationSideEffect::None),
-                    _ => Err(AppErrors::FuctionNotImplemented(decoder.get_funct3(), None)),
+                    _ => Err(AppErrors::FuctionNotImplemented(
+                        decoder.get_funct3_field(),
+                        None,
+                    )),
                 }
             }
             CpuInstructionsOpCodes::CONTROL_JAL => {
@@ -115,47 +125,50 @@ impl Cpu {
             }
             CpuInstructionsOpCodes::CONDITIONAL_BRANCHES => {
                 let decoder = BTypeDecoder::new(instruction);
-                match decoder.get_funct3() {
+                match decoder.get_funct3_field() {
                     SubFunctions::BEQ => InstructionsExecutor::beq(self, decoder),
                     SubFunctions::BNE => InstructionsExecutor::bne(self, decoder),
                     SubFunctions::BLT => InstructionsExecutor::blt(self, decoder),
                     SubFunctions::BLTU => InstructionsExecutor::bltu(self, decoder),
                     SubFunctions::BGE => InstructionsExecutor::bge(self, decoder),
                     SubFunctions::BGEU => InstructionsExecutor::bgeu(self, decoder),
-                    _ => Err(AppErrors::FuctionNotImplemented(decoder.get_funct3(), None)),
+                    _ => Err(AppErrors::FuctionNotImplemented(
+                        decoder.get_funct3_field(),
+                        None,
+                    )),
                 }
             }
             CpuInstructionsOpCodes::INT_REG_IMMEDIATE_RV64I => {
                 let decoder = RTypeDecoder::new(instruction);
-                let funct7 = if decoder.get_funct3() == SubFunctions::ADDIW.0 {
+                let funct7 = if decoder.get_funct3_field() == SubFunctions::ADDIW.0 {
                     0x00
                 } else {
-                    decoder.get_funct7()
+                    decoder.get_funct7_field()
                 };
-                match (decoder.get_funct3(), funct7) {
+                match (decoder.get_funct3_field(), funct7) {
                     SubFunctions::ADDIW => {
                         InstructionsExecutor::addiw(self, ITypeDecoder::new(instruction))
                     }
                     _ => Err(AppErrors::FuctionNotImplemented(
-                        decoder.get_funct3(),
-                        Some(decoder.get_funct7()),
+                        decoder.get_funct3_field(),
+                        Some(decoder.get_funct7_field()),
                     )),
                 }
             }
             CpuInstructionsOpCodes::INT_REG_REG_RV64I => {
                 let decoder = RTypeDecoder::new(instruction);
-                match (decoder.get_funct3(), decoder.get_funct7()) {
+                match (decoder.get_funct3_field(), decoder.get_funct7_field()) {
                     SubFunctions::ADDW => InstructionsExecutor::addw(self, decoder),
                     SubFunctions::SUBW => InstructionsExecutor::subw(self, decoder),
                     _ => Err(AppErrors::FuctionNotImplemented(
-                        decoder.get_funct3(),
-                        Some(decoder.get_funct7()),
+                        decoder.get_funct3_field(),
+                        Some(decoder.get_funct7_field()),
                     )),
                 }
             }
             CpuInstructionsOpCodes::MEM_ORDERING => {
                 let decoder = ITypeDecoder::new(instruction);
-                match decoder.get_funct3() {
+                match decoder.get_funct3_field() {
                     SubFunctions::FENCE => {
                         //Not necesary for the moment being,since
                         //this is an in-order execution emulator
@@ -174,6 +187,27 @@ impl Cpu {
             }
             _ => Err(AppErrors::InstructionNotImplemented { instruction }),
         }
+    }
+    pub fn execute(&mut self, instruction: u32) -> AppResult<OperationSideEffect> {
+        let op_code = decoder::get_op_code(instruction);
+        let instruction_size = decoder::get_instruction_size(op_code)?;
+        let exec_result = match instruction_size {
+            InstructionSize::B16 => {
+                let instruction = instruction & 0xffff;
+                Err(AppErrors::InstructionNotImplemented {
+                    instruction: instruction,
+                })
+            }
+            InstructionSize::B32 => self.exec_32bit_instruction(instruction),
+        };
+
+        exec_result.map(|result| match result {
+            OperationSideEffect::SkipPCIncrease => OperationSideEffect::None,
+            _ => {
+                self.increase_program_counter(instruction_size);
+                result
+            }
+        })
     }
 }
 

@@ -1,7 +1,10 @@
 use crate::{
     cpu::{
         instruction_excecutors::InstructionsExecutor,
-        instructions::decoder::{ITypeDecoder, RdDecoder, Rs1Decoder},
+        instructions::decoder::{
+            b32::{RdDecoder, Rs1Decoder},
+            ITypeDecoder,
+        },
         side_effects::OperationSideEffect,
         Cpu,
     },
@@ -19,9 +22,9 @@ impl InstructionsExecutor {
     #[inline(always)]
     pub fn addiw(cpu: &mut Cpu, instruction: ITypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
-            instruction.get_rd() as usize,
-            cpu.registers[instruction.get_rs1() as usize].wrapping_add(instruction.get_imm()) as i32
-                as i64 as u64,
+            instruction.get_rd_field() as usize,
+            cpu.registers[instruction.get_rs1_field() as usize].wrapping_add(instruction.get_imm())
+                as i32 as i64 as u64,
         )
     }
 }

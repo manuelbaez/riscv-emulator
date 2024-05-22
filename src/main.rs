@@ -6,7 +6,10 @@ use cpu::Cpu;
 #[cfg(feature = "debug")]
 use std::{thread, time::Duration};
 
-use crate::cpu::side_effects::OperationSideEffect;
+use crate::cpu::{
+    instructions::{self, decoder},
+    side_effects::OperationSideEffect,
+};
 #[cfg(feature = "debug")]
 use crate::debug::{init_debug_print_thread_channel, DebugMessages};
 
@@ -38,7 +41,7 @@ fn main() {
         #[cfg(feature = "debug")]
         let debug_cycle_start = now.elapsed().as_nanos();
 
-        let instruction = match cpu.fetch_next_instruction() {
+        let fetched_instruction = match cpu.fetch_next_instruction() {
             Ok(inst) => inst,
             Err(err) => {
                 let program_counter = cpu.get_program_counter();
@@ -49,7 +52,7 @@ fn main() {
 
         // #[cfg(feature = "debug")]
         let fetched_pc = cpu.get_program_counter();
-        let execution_result = cpu.execute(instruction);
+        let execution_result = cpu.execute(fetched_instruction);
 
         #[cfg(feature = "debug")]
         {
@@ -57,7 +60,7 @@ fn main() {
                 .send(DebugMessages::InstructionExecution {
                     time_elapsed_ns: now.elapsed().as_nanos() - debug_cycle_start,
                     pc: fetched_pc,
-                    instruction,
+                    instruction: fetched_instruction,
                     registers: cpu.get_registers(),
                 })
                 .unwrap();
@@ -65,16 +68,12 @@ fn main() {
 
         match execution_result {
             Ok(OperationSideEffect::None) => (),
-            Ok(OperationSideEffect::SkipPCIncrease) => {
-                continue;
-            }
             Err(err) => {
-                eprintln!("{fetched_pc:0x}: {instruction:0x} {err}");
+                eprintln!("{fetched_pc:0x}: {fetched_instruction:0x} {err}");
                 break;
             }
             _ => (),
         };
-        cpu.increase_program_counter();
     }
 
     let run_time = now.elapsed();

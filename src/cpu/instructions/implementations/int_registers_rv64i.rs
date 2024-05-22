@@ -1,7 +1,10 @@
 use crate::{
     cpu::{
         instruction_excecutors::InstructionsExecutor,
-        instructions::decoder::{RTypeDecoder, RdDecoder, Rs1Decoder, Rs2Decoder},
+        instructions::decoder::{
+            b32::{RdDecoder, Rs1Decoder, Rs2Decoder},
+            RTypeDecoder,
+        },
         side_effects::OperationSideEffect,
         Cpu,
     },
@@ -23,10 +26,10 @@ impl InstructionsExecutor {
     #[inline(always)]
     pub fn addw(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
-            instruction.get_rd() as usize,
-            cpu.registers[instruction.get_rs1() as usize]
-                .wrapping_add(cpu.registers[instruction.get_rs2() as usize]) as i32
-                as i64 as u64,
+            instruction.get_rd_field() as usize,
+            cpu.registers[instruction.get_rs1_field() as usize]
+                .wrapping_add(cpu.registers[instruction.get_rs2_field() as usize])
+                as i32 as i64 as u64,
         )
     }
     /// Substract the value held on rs2 to rs1 and sets to rd:
@@ -36,10 +39,10 @@ impl InstructionsExecutor {
     #[inline(always)]
     pub fn subw(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
-            instruction.get_rd() as usize,
-            cpu.registers[instruction.get_rs1() as usize]
-                .wrapping_sub(cpu.registers[instruction.get_rs2() as usize]) as i32
-                as i64 as u64,
+            instruction.get_rd_field() as usize,
+            cpu.registers[instruction.get_rs1_field() as usize]
+                .wrapping_sub(cpu.registers[instruction.get_rs2_field() as usize])
+                as i32 as i64 as u64,
         )
     }
 }

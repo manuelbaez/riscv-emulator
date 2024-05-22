@@ -15,6 +15,8 @@ pub enum AppErrors {
     InstructionNotImplemented { instruction: u32 },
     #[error("Instruction function is not supported yet")]
     FuctionNotImplemented(u8, Option<u8>),
+    #[error("Instruction size is not supported")]
+    InstructionSizeNotSupported,
     #[error("unknown error ocurred")]
     Unknown,
 }

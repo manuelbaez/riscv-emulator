@@ -4,11 +4,11 @@ use crate::{
     system_bus::SystemBus,
 };
 
-use self::{instructions::DEFAULT_INSTRUCTION_SIZE_BYTES, side_effects::OperationSideEffect};
+use self::{instructions::decoder::InstructionSize, side_effects::OperationSideEffect};
 
 mod cs_registers;
 mod instruction_excecutors;
-mod instructions;
+pub mod instructions;
 pub mod side_effects;
 
 const CPU_REG_COUNT: usize = 32;
@@ -51,8 +51,12 @@ impl Cpu {
     }
     /// Increase the program counter to lookup the next instruction in the next cycle
     #[inline(always)]
-    pub fn increase_program_counter(&mut self) {
-        self.program_counter += DEFAULT_INSTRUCTION_SIZE_BYTES as u64;
+    pub fn increase_program_counter(&mut self, instruction_size: InstructionSize) {
+        match instruction_size {
+            InstructionSize::B16 => self.program_counter += instruction_size as u64,
+            InstructionSize::B32 => self.program_counter += instruction_size as u64,
+        }
+        // self.program_counter += DEFAULT_INSTRUCTION_SIZE_BYTES as u64;
     }
 
     #[inline(always)]

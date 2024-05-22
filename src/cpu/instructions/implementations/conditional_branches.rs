@@ -2,7 +2,10 @@ use crate::{
     cpu::{
         instruction_excecutors::InstructionsExecutor,
         instructions::{
-            decoder::{BTypeDecoder, Rs1Decoder, Rs2Decoder},
+            decoder::{
+                b32::{Rs1Decoder, Rs2Decoder},
+                BTypeDecoder,
+            },
             DEFAULT_INSTRUCTION_SIZE_BYTES,
         },
         side_effects::OperationSideEffect,
@@ -31,8 +34,8 @@ impl InstructionsExecutor {
         cpu.program_counter = cpu
             .program_counter
             .wrapping_add(
-                (cpu.registers[instruction.get_rs1() as usize]
-                    == cpu.registers[instruction.get_rs2() as usize]) as u64
+                (cpu.registers[instruction.get_rs1_field() as usize]
+                    == cpu.registers[instruction.get_rs2_field() as usize]) as u64
                     * (instruction
                         .get_imm()
                         .wrapping_sub(DEFAULT_INSTRUCTION_SIZE_BYTES as u64)),
@@ -50,8 +53,8 @@ impl InstructionsExecutor {
         cpu.program_counter = cpu
             .program_counter
             .wrapping_add(
-                (cpu.registers[instruction.get_rs1() as usize]
-                    != cpu.registers[instruction.get_rs2() as usize]) as u64
+                (cpu.registers[instruction.get_rs1_field() as usize]
+                    != cpu.registers[instruction.get_rs2_field() as usize]) as u64
                     * (instruction
                         .get_imm()
                         //Subtracting the instruction size as we have advanced the program counter beforehand
@@ -69,8 +72,8 @@ impl InstructionsExecutor {
         cpu.program_counter = cpu
             .program_counter
             .wrapping_add(
-                ((cpu.registers[instruction.get_rs1() as usize] as i64)
-                    < (cpu.registers[instruction.get_rs2() as usize] as i64))
+                ((cpu.registers[instruction.get_rs1_field() as usize] as i64)
+                    < (cpu.registers[instruction.get_rs2_field() as usize] as i64))
                     as u64
                     * (instruction
                         .get_imm()
@@ -89,8 +92,8 @@ impl InstructionsExecutor {
         cpu.program_counter = cpu
             .program_counter
             .wrapping_add(
-                (cpu.registers[instruction.get_rs1() as usize]
-                    < cpu.registers[instruction.get_rs2() as usize]) as u64
+                (cpu.registers[instruction.get_rs1_field() as usize]
+                    < cpu.registers[instruction.get_rs2_field() as usize]) as u64
                     * (instruction
                         .get_imm()
                         //Subtracting the instruction size as we have advanced the program counter beforehand
@@ -108,8 +111,8 @@ impl InstructionsExecutor {
         cpu.program_counter = cpu
             .program_counter
             .wrapping_add(
-                ((cpu.registers[instruction.get_rs1() as usize] as i64)
-                    >= (cpu.registers[instruction.get_rs2() as usize] as i64))
+                ((cpu.registers[instruction.get_rs1_field() as usize] as i64)
+                    >= (cpu.registers[instruction.get_rs2_field() as usize] as i64))
                     as u64
                     * (instruction
                         .get_imm()
@@ -128,8 +131,8 @@ impl InstructionsExecutor {
         cpu.program_counter = cpu
             .program_counter
             .wrapping_add(
-                (cpu.registers[instruction.get_rs1() as usize]
-                    >= cpu.registers[instruction.get_rs2() as usize]) as u64
+                (cpu.registers[instruction.get_rs1_field() as usize]
+                    >= cpu.registers[instruction.get_rs2_field() as usize]) as u64
                     * (instruction
                         .get_imm()
                         //Subtracting the instruction size as we have advanced the program counter beforehand

@@ -1,48 +1,31 @@
+pub mod b32;
+
+use crate::error::AppResult;
+
+use self::b32::{Funct3Decoder, Funct7Decoder, OpcodeDecoder, RdDecoder, Rs1Decoder, Rs2Decoder};
+
+#[inline(always)]
 pub fn get_op_code(instruction: u32) -> u8 {
     (instruction & 0x7f) as u8
 }
+#[inline(always)]
+pub fn get_instruction_size(opcode: u8) -> AppResult<InstructionSize> {
+    match opcode {
+        _ if opcode & 0b11 == 0b11 => Ok(InstructionSize::B32),
+        _ if (opcode & 0b11 == 0b00) || (opcode & 0b11 == 0b01) || (opcode & 0b11 == 0b10) => {
+            Ok(InstructionSize::B16)
+        }
+        _ => Err(crate::error::AppErrors::InstructionSizeNotSupported),
+    }
+}
 
-//Standard Filed decoders
+pub enum InstructionSize {
+    B16 = 2,
+    B32 = 4,
+}
 
 pub trait InstructionGetter {
     fn get_raw_instruction(&self) -> u32;
-}
-#[allow(dead_code)]
-pub trait OpcodeDecoder: InstructionGetter {
-    #[inline(always)]
-    fn get_opcode(&self) -> u8 {
-        (self.get_raw_instruction() & 0x7f) as u8
-    }
-}
-pub trait RdDecoder: InstructionGetter {
-    #[inline(always)]
-    fn get_rd(&self) -> u8 {
-        ((self.get_raw_instruction() >> 7) & 0x1f) as u8
-    }
-}
-pub trait Funct3Decoder: InstructionGetter {
-    #[inline(always)]
-    fn get_funct3(&self) -> u8 {
-        ((self.get_raw_instruction()) >> 12 & 0x07) as u8
-    }
-}
-pub trait Rs1Decoder: InstructionGetter {
-    #[inline(always)]
-    fn get_rs1(&self) -> u8 {
-        ((self.get_raw_instruction() >> 15) & 0x1f) as u8
-    }
-}
-pub trait Rs2Decoder: InstructionGetter {
-    #[inline(always)]
-    fn get_rs2(&self) -> u8 {
-        ((self.get_raw_instruction() >> 20) & 0x1f) as u8
-    }
-}
-pub trait Funct7Decoder: InstructionGetter {
-    #[inline(always)]
-    fn get_funct7(&self) -> u8 {
-        ((self.get_raw_instruction() >> 25) & 0x3f) as u8
-    }
 }
 
 //Format decoders
@@ -50,6 +33,7 @@ pub trait Funct7Decoder: InstructionGetter {
 pub struct RTypeDecoder {
     instruction: u32,
 }
+
 impl InstructionGetter for RTypeDecoder {
     #[inline(always)]
     fn get_raw_instruction(&self) -> u32 {

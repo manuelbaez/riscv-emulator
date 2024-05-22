@@ -1,7 +1,10 @@
 use crate::{
     cpu::{
         instruction_excecutors::InstructionsExecutor,
-        instructions::decoder::{RTypeDecoder, RdDecoder, Rs1Decoder, Rs2Decoder},
+        instructions::decoder::{
+            b32::{RdDecoder, Rs1Decoder, Rs2Decoder},
+            RTypeDecoder,
+        },
         side_effects::OperationSideEffect,
         Cpu,
     },
@@ -29,9 +32,9 @@ impl InstructionsExecutor {
     #[inline(always)]
     pub fn add(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
-            instruction.get_rd() as usize,
-            cpu.registers[instruction.get_rs1() as usize]
-                .wrapping_add(cpu.registers[instruction.get_rs2() as usize]),
+            instruction.get_rd_field() as usize,
+            cpu.registers[instruction.get_rs1_field() as usize]
+                .wrapping_add(cpu.registers[instruction.get_rs2_field() as usize]),
         )
     }
     /// Substract the value held on rs2 to rs1 and sets to rd:
@@ -39,9 +42,9 @@ impl InstructionsExecutor {
     #[inline(always)]
     pub fn sub(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
-            instruction.get_rd() as usize,
-            cpu.registers[instruction.get_rs1() as usize]
-                .wrapping_sub(cpu.registers[instruction.get_rs2() as usize]),
+            instruction.get_rd_field() as usize,
+            cpu.registers[instruction.get_rs1_field() as usize]
+                .wrapping_sub(cpu.registers[instruction.get_rs2_field() as usize]),
         )
     }
     /// Compares the values held in registers as signed by rs1 < rs2
@@ -49,9 +52,9 @@ impl InstructionsExecutor {
     #[inline(always)]
     pub fn slt(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
-            instruction.get_rd() as usize,
-            ((cpu.registers[instruction.get_rs1() as usize] as i64)
-                < (cpu.registers[instruction.get_rs2() as usize] as i64)) as u64,
+            instruction.get_rd_field() as usize,
+            ((cpu.registers[instruction.get_rs1_field() as usize] as i64)
+                < (cpu.registers[instruction.get_rs2_field() as usize] as i64)) as u64,
         )
     }
     /// Compares the values held in registers as unsigned by rs1 < rs2
@@ -59,36 +62,36 @@ impl InstructionsExecutor {
     #[inline(always)]
     pub fn sltu(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
-            instruction.get_rd() as usize,
-            (cpu.registers[instruction.get_rs1() as usize]
-                < cpu.registers[instruction.get_rs2() as usize]) as u64,
+            instruction.get_rd_field() as usize,
+            (cpu.registers[instruction.get_rs1_field() as usize]
+                < cpu.registers[instruction.get_rs2_field() as usize]) as u64,
         )
     }
     ///Bitwise AND
     #[inline(always)]
     pub fn and(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
-            instruction.get_rd() as usize,
-            (cpu.registers[instruction.get_rs1() as usize]
-                & cpu.registers[instruction.get_rs2() as usize]) as u64,
+            instruction.get_rd_field() as usize,
+            (cpu.registers[instruction.get_rs1_field() as usize]
+                & cpu.registers[instruction.get_rs2_field() as usize]) as u64,
         )
     }
     ///Bitwise OR
     #[inline(always)]
     pub fn or(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
-            instruction.get_rd() as usize,
-            (cpu.registers[instruction.get_rs1() as usize]
-                | cpu.registers[instruction.get_rs2() as usize]) as u64,
+            instruction.get_rd_field() as usize,
+            (cpu.registers[instruction.get_rs1_field() as usize]
+                | cpu.registers[instruction.get_rs2_field() as usize]) as u64,
         )
     }
     ///Bitwise XOR
     #[inline(always)]
     pub fn xor(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
-            instruction.get_rd() as usize,
-            (cpu.registers[instruction.get_rs1() as usize]
-                ^ cpu.registers[instruction.get_rs2() as usize]) as u64,
+            instruction.get_rd_field() as usize,
+            (cpu.registers[instruction.get_rs1_field() as usize]
+                ^ cpu.registers[instruction.get_rs2_field() as usize]) as u64,
         )
     }
     /// Performs a logical left shift on rs1 by the shift amount
@@ -96,9 +99,9 @@ impl InstructionsExecutor {
     #[inline(always)]
     pub fn sll(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
-            instruction.get_rd() as usize,
-            cpu.registers[instruction.get_rs1() as usize]
-                .wrapping_shl((cpu.registers[instruction.get_rs2() as usize] & 0x3f) as u32),
+            instruction.get_rd_field() as usize,
+            cpu.registers[instruction.get_rs1_field() as usize]
+                .wrapping_shl((cpu.registers[instruction.get_rs2_field() as usize] & 0x3f) as u32),
         )
     }
     /// Performs a logical right shift on rs1 by the shift amount
@@ -106,9 +109,9 @@ impl InstructionsExecutor {
     #[inline(always)]
     pub fn srl(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
-            instruction.get_rd() as usize,
-            cpu.registers[instruction.get_rs1() as usize]
-                .wrapping_shr((cpu.registers[instruction.get_rs2() as usize] & 0x3f) as u32),
+            instruction.get_rd_field() as usize,
+            cpu.registers[instruction.get_rs1_field() as usize]
+                .wrapping_shr((cpu.registers[instruction.get_rs2_field() as usize] & 0x3f) as u32),
         )
     }
     /// Performs a arimetric right shift (sign-extended) on rs1 by the shift amount
@@ -116,9 +119,9 @@ impl InstructionsExecutor {
     #[inline(always)]
     pub fn sra(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
-            instruction.get_rd() as usize,
-            (cpu.registers[instruction.get_rs1() as usize] as i64)
-                .wrapping_shr((cpu.registers[instruction.get_rs2() as usize] & 0x3f) as u32)
+            instruction.get_rd_field() as usize,
+            (cpu.registers[instruction.get_rs1_field() as usize] as i64)
+                .wrapping_shr((cpu.registers[instruction.get_rs2_field() as usize] & 0x3f) as u32)
                 as u64,
         )
     }
