@@ -24,9 +24,9 @@ pub fn init_debug_print_thread_channel() -> (JoinHandle<()>, Sender<DebugMessage
                 time_elapsed_ns,
                 pc,
                 instruction,
-                registers,
+                registers: _,
             } => {
-                let sp = registers[2];
+                // let sp = registers[2];
                 println!("{pc:0x}: {instruction:06x} - {time_elapsed_ns}ns ");
             }
             DebugMessages::DumpRegisters(registers) => dump_registers(registers),

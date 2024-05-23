@@ -1,13 +1,7 @@
 use crate::{
     cpu::{
         instruction_excecutors::InstructionsExecutor,
-        instructions::{
-            decoder::{
-                b32::{Rs1Decoder, Rs2Decoder},
-                BTypeDecoder,
-            },
-            DEFAULT_INSTRUCTION_SIZE_BYTES,
-        },
+        instructions::{decoder::b32::BTypeDecoder, DEFAULT_INSTRUCTION_SIZE_BYTES},
         side_effects::OperationSideEffect,
         Cpu,
     },
@@ -30,14 +24,14 @@ impl InstructionsExecutor {
     /// it adds the immediate value to the current pc address to continue
     /// program execution in that address
     #[inline(always)]
-    pub fn beq(cpu: &mut Cpu, instruction: BTypeDecoder) -> AppResult<OperationSideEffect> {
+    pub fn beq(cpu: &mut Cpu, instruction: impl BTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.program_counter = cpu
             .program_counter
             .wrapping_add(
                 (cpu.registers[instruction.get_rs1_field() as usize]
                     == cpu.registers[instruction.get_rs2_field() as usize]) as u64
                     * (instruction
-                        .get_imm()
+                        .get_b_imm()
                         .wrapping_sub(DEFAULT_INSTRUCTION_SIZE_BYTES as u64)),
             )
             .wrapping_add(DEFAULT_INSTRUCTION_SIZE_BYTES as u64);
@@ -49,14 +43,14 @@ impl InstructionsExecutor {
     /// it adds the immediate value to the current pc address to continue
     /// program execution in that address
     #[inline(always)]
-    pub fn bne(cpu: &mut Cpu, instruction: BTypeDecoder) -> AppResult<OperationSideEffect> {
+    pub fn bne(cpu: &mut Cpu, instruction: impl BTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.program_counter = cpu
             .program_counter
             .wrapping_add(
                 (cpu.registers[instruction.get_rs1_field() as usize]
                     != cpu.registers[instruction.get_rs2_field() as usize]) as u64
                     * (instruction
-                        .get_imm()
+                        .get_b_imm()
                         //Subtracting the instruction size as we have advanced the program counter beforehand
                         .wrapping_sub(DEFAULT_INSTRUCTION_SIZE_BYTES as u64)),
             )
@@ -68,7 +62,7 @@ impl InstructionsExecutor {
     /// it adds the immediate value to the current pc address to continue
     /// program execution in that address
     #[inline(always)]
-    pub fn blt(cpu: &mut Cpu, instruction: BTypeDecoder) -> AppResult<OperationSideEffect> {
+    pub fn blt(cpu: &mut Cpu, instruction: impl BTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.program_counter = cpu
             .program_counter
             .wrapping_add(
@@ -76,7 +70,7 @@ impl InstructionsExecutor {
                     < (cpu.registers[instruction.get_rs2_field() as usize] as i64))
                     as u64
                     * (instruction
-                        .get_imm()
+                        .get_b_imm()
                         //Subtracting the instruction size as we have advanced the program counter beforehand
                         .wrapping_sub(DEFAULT_INSTRUCTION_SIZE_BYTES as u64)),
             )
@@ -88,14 +82,14 @@ impl InstructionsExecutor {
     /// it adds the immediate value to the current pc address to continue
     /// program execution in that address
     #[inline(always)]
-    pub fn bltu(cpu: &mut Cpu, instruction: BTypeDecoder) -> AppResult<OperationSideEffect> {
+    pub fn bltu(cpu: &mut Cpu, instruction: impl BTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.program_counter = cpu
             .program_counter
             .wrapping_add(
                 (cpu.registers[instruction.get_rs1_field() as usize]
                     < cpu.registers[instruction.get_rs2_field() as usize]) as u64
                     * (instruction
-                        .get_imm()
+                        .get_b_imm()
                         //Subtracting the instruction size as we have advanced the program counter beforehand
                         .wrapping_sub(DEFAULT_INSTRUCTION_SIZE_BYTES as u64)),
             )
@@ -107,7 +101,7 @@ impl InstructionsExecutor {
     /// it adds the immediate value to the current pc address to continue
     /// program execution in that address
     #[inline(always)]
-    pub fn bge(cpu: &mut Cpu, instruction: BTypeDecoder) -> AppResult<OperationSideEffect> {
+    pub fn bge(cpu: &mut Cpu, instruction: impl BTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.program_counter = cpu
             .program_counter
             .wrapping_add(
@@ -115,7 +109,7 @@ impl InstructionsExecutor {
                     >= (cpu.registers[instruction.get_rs2_field() as usize] as i64))
                     as u64
                     * (instruction
-                        .get_imm()
+                        .get_b_imm()
                         //Subtracting the instruction size as we have advanced the program counter beforehand
                         .wrapping_sub(DEFAULT_INSTRUCTION_SIZE_BYTES as u64)),
             )
@@ -127,14 +121,14 @@ impl InstructionsExecutor {
     /// or equals rs2, it adds the immediate value to the current pc address to
     /// continue program execution in that address
     #[inline(always)]
-    pub fn bgeu(cpu: &mut Cpu, instruction: BTypeDecoder) -> AppResult<OperationSideEffect> {
+    pub fn bgeu(cpu: &mut Cpu, instruction: impl BTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.program_counter = cpu
             .program_counter
             .wrapping_add(
                 (cpu.registers[instruction.get_rs1_field() as usize]
                     >= cpu.registers[instruction.get_rs2_field() as usize]) as u64
                     * (instruction
-                        .get_imm()
+                        .get_b_imm()
                         //Subtracting the instruction size as we have advanced the program counter beforehand
                         .wrapping_sub(DEFAULT_INSTRUCTION_SIZE_BYTES as u64)),
             )

@@ -1,10 +1,7 @@
 use crate::{
     cpu::{
         instruction_excecutors::InstructionsExecutor,
-        instructions::decoder::{
-            b32::{Funct3Decoder, RdDecoder, Rs1Decoder},
-            ITypeDecoder,
-        },
+        instructions::decoder::b32::{Funct3Decoder, ITypeDecoder, RdDecoder, Rs1Decoder},
         side_effects::OperationSideEffect,
         Cpu,
     },
@@ -33,10 +30,9 @@ impl SubFunctions {
 
 impl InstructionsExecutor {
     #[inline(always)]
-    pub fn load(cpu: &mut Cpu, instruction: u32) -> AppResult<OperationSideEffect> {
-        let decoder = ITypeDecoder::new(instruction);
+    pub fn load(cpu: &mut Cpu, decoder: impl ITypeDecoder) -> AppResult<OperationSideEffect> {
         let addr: u64 =
-            cpu.registers[decoder.get_rs1_field() as usize].wrapping_add(decoder.get_imm());
+            cpu.registers[decoder.get_rs1_field() as usize].wrapping_add(decoder.get_i_imm());
         match decoder.get_funct3_field() {
             SubFunctions::LB => match cpu.system_bus.load8(addr) {
                 Ok(value) => {
@@ -72,7 +68,9 @@ impl InstructionsExecutor {
                 Ok(value) => cpu.write_reg(decoder.get_rd_field() as usize, value as u64),
                 Err(err) => Err(err),
             },
-            _ => Err(AppErrors::InstructionNotImplemented { instruction }),
+            _ => Err(AppErrors::InstructionNotImplemented {
+                instruction: decoder.get_raw_instruction(),
+            }),
         }
     }
 }

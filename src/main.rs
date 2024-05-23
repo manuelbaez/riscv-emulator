@@ -6,10 +6,7 @@ use cpu::Cpu;
 #[cfg(feature = "debug")]
 use std::{thread, time::Duration};
 
-use crate::cpu::{
-    instructions::{self, decoder},
-    side_effects::OperationSideEffect,
-};
+use crate::cpu::side_effects::OperationSideEffect;
 #[cfg(feature = "debug")]
 use crate::debug::{init_debug_print_thread_channel, DebugMessages};
 

@@ -1,10 +1,7 @@
 use crate::{
     cpu::{
         instruction_excecutors::InstructionsExecutor,
-        instructions::decoder::{
-            b32::{RdDecoder, Rs1Decoder, Rs2Decoder},
-            RTypeDecoder,
-        },
+        instructions::decoder::b32::{RTypeDecoder, RdDecoder, Rs1Decoder, Rs2Decoder},
         side_effects::OperationSideEffect,
         Cpu,
     },
@@ -24,7 +21,7 @@ impl InstructionsExecutor {
     /// This instruction only sets the lower 32 bits and
     /// sign extends the value to 64
     #[inline(always)]
-    pub fn addw(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
+    pub fn addw(cpu: &mut Cpu, instruction: impl RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
             instruction.get_rd_field() as usize,
             cpu.registers[instruction.get_rs1_field() as usize]
@@ -37,7 +34,7 @@ impl InstructionsExecutor {
     /// This instruction only sets the lower 32 bits and
     /// sign extends the value to 64
     #[inline(always)]
-    pub fn subw(cpu: &mut Cpu, instruction: RTypeDecoder) -> AppResult<OperationSideEffect> {
+    pub fn subw(cpu: &mut Cpu, instruction: impl RTypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
             instruction.get_rd_field() as usize,
             cpu.registers[instruction.get_rs1_field() as usize]
