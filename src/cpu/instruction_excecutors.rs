@@ -8,8 +8,8 @@ use super::{
         decoder::{
             self,
             b32::{
-                Funct3Decoder, Funct7Decoder, ITypeDecoder, InstructionFormat,
-                Instrunction32Decoder, Rs1Decoder, Rs2Decoder, STypeDecoder,
+                Funct3Decoder, Funct7Decoder, InstructionFormat, Instrunction32Decoder, Rs1Decoder,
+                Rs2Decoder,
             },
             InstructionSize,
         },

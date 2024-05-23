@@ -1,9 +1,7 @@
 use crate::{
     cpu::{
-        instruction_excecutors::InstructionsExecutor,
-        instructions::decoder::b32::{RTypeDecoder, RdDecoder, Rs1Decoder, Rs2Decoder},
-        side_effects::OperationSideEffect,
-        Cpu,
+        instruction_excecutors::InstructionsExecutor, instructions::decoder::b32::RTypeDecoder,
+        side_effects::OperationSideEffect, Cpu,
     },
     error::AppResult,
 };
