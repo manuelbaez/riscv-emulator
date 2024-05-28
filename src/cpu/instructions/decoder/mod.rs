@@ -22,6 +22,6 @@ pub enum InstructionSize {
     B32 = 4,
 }
 
-pub trait InstructionGetter {
+pub trait InstructionRawGetter {
     fn get_raw_instruction(&self) -> u32;
 }

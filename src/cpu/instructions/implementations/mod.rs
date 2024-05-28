@@ -1,9 +1,7 @@
 pub mod conditional_branches;
 pub mod control_transfer;
 pub mod int_register_immediate;
-pub mod int_register_immediate_rv64i;
 pub mod int_registers;
-pub mod int_registers_rv64i;
 pub mod load;
 pub mod memory_ordering;
 pub mod store;

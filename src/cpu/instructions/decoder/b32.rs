@@ -1,4 +1,4 @@
-use super::InstructionGetter;
+use super::InstructionRawGetter;
 
 #[allow(dead_code)]
 pub enum InstructionFormat {
@@ -14,7 +14,7 @@ pub struct Instrunction32Decoder {
     instruction: u32,
 }
 
-impl InstructionGetter for Instrunction32Decoder {
+impl InstructionRawGetter for Instrunction32Decoder {
     #[inline(always)]
     fn get_raw_instruction(&self) -> u32 {
         self.instruction
@@ -53,39 +53,39 @@ impl Instrunction32Decoder {
     }
 }
 
-//Standard Filed decoders for 3.02 bit instructions
+//Standard Filed decoders for 32 bit instructions
 #[allow(dead_code)]
-pub trait OpcodeDecoder: InstructionGetter {
+pub trait OpcodeDecoder: InstructionRawGetter {
     #[inline(always)]
     fn get_opcode(&self) -> u8 {
         (self.get_raw_instruction() & 0x7f) as u8
     }
 }
-pub trait RdDecoder: InstructionGetter {
+pub trait RdDecoder: InstructionRawGetter {
     #[inline(always)]
     fn get_rd_field(&self) -> u8 {
         ((self.get_raw_instruction() >> 7) & 0x1f) as u8
     }
 }
-pub trait Funct3Decoder: InstructionGetter {
+pub trait Funct3Decoder: InstructionRawGetter {
     #[inline(always)]
     fn get_funct3_field(&self) -> u8 {
         ((self.get_raw_instruction()) >> 12 & 0x07) as u8
     }
 }
-pub trait Rs1Decoder: InstructionGetter {
+pub trait Rs1Decoder: InstructionRawGetter {
     #[inline(always)]
     fn get_rs1_field(&self) -> u8 {
         ((self.get_raw_instruction() >> 15) & 0x1f) as u8
     }
 }
-pub trait Rs2Decoder: InstructionGetter {
+pub trait Rs2Decoder: InstructionRawGetter {
     #[inline(always)]
     fn get_rs2_field(&self) -> u8 {
         ((self.get_raw_instruction() >> 20) & 0x1f) as u8
     }
 }
-pub trait Funct7Decoder: InstructionGetter {
+pub trait Funct7Decoder: InstructionRawGetter {
     #[inline(always)]
     fn get_funct7_field(&self) -> u8 {
         ((self.get_raw_instruction() >> 25) & 0x3f) as u8
@@ -98,7 +98,7 @@ pub trait RTypeDecoder:
 }
 
 pub trait ITypeDecoder:
-    InstructionGetter + OpcodeDecoder + RdDecoder + Funct3Decoder + Rs1Decoder
+    InstructionRawGetter + OpcodeDecoder + RdDecoder + Funct3Decoder + Rs1Decoder
 {
     #[inline(always)]
     fn get_i_imm(&self) -> u64 {
@@ -107,7 +107,7 @@ pub trait ITypeDecoder:
 }
 
 pub trait STypeDecoder:
-    InstructionGetter + OpcodeDecoder + Funct3Decoder + Rs1Decoder + Rs2Decoder
+    InstructionRawGetter + OpcodeDecoder + Funct3Decoder + Rs1Decoder + Rs2Decoder
 {
     #[inline(always)]
     fn get_s_imm(&self) -> u64 {
@@ -116,7 +116,7 @@ pub trait STypeDecoder:
     }
 }
 
-pub trait UTypeDecoder: InstructionGetter + OpcodeDecoder + RdDecoder {
+pub trait UTypeDecoder: InstructionRawGetter + OpcodeDecoder + RdDecoder {
     #[inline(always)]
     fn get_u_imm(&self) -> u64 {
         // & 0xffff_f000_u32 just in case this mask sets the lower 12 bits to 0
@@ -124,7 +124,7 @@ pub trait UTypeDecoder: InstructionGetter + OpcodeDecoder + RdDecoder {
     }
 }
 
-pub trait JTypeDecoder: InstructionGetter + OpcodeDecoder + RdDecoder {
+pub trait JTypeDecoder: InstructionRawGetter + OpcodeDecoder + RdDecoder {
     #[inline(always)]
     fn get_j_imm(&self) -> u64 {
         (((self.get_raw_instruction() & 0x80000000) as i32 as i64 >>11) as u64) //Bit [20]
@@ -135,7 +135,7 @@ pub trait JTypeDecoder: InstructionGetter + OpcodeDecoder + RdDecoder {
 }
 
 pub trait BTypeDecoder:
-    InstructionGetter + OpcodeDecoder + Funct3Decoder + Rs1Decoder + Rs2Decoder
+    InstructionRawGetter + OpcodeDecoder + Funct3Decoder + Rs1Decoder + Rs2Decoder
 {
     #[inline(always)]
     fn get_b_imm(&self) -> u64 {

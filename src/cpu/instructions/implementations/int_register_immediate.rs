@@ -18,6 +18,7 @@ impl SubFunctions {
     //For opcode 0010011(0x13)
     ///Add Immediate
     pub const ADDI: u8 = 0x0;
+    pub const ADDIW: (u8, u8) = (0b000, 0b000);
     ///Set less than immediate
     pub const SLTI: u8 = 0x2;
     ///Set less than immediate unsigned
@@ -25,10 +26,12 @@ impl SubFunctions {
     pub const XORI: u8 = 0x4;
     pub const ORI: u8 = 0x6;
     pub const ANDI: u8 = 0x7;
+    ///Shift Left Logical Immediate
     pub const SLLI: u8 = 0x01;
-
     pub const SRLI_SRAI_F3: u8 = 0x05;
+    ///Shift Right Logical Immediate
     pub const SRLI: (u8, u8) = (Self::SRLI_SRAI_F3, 0x00);
+    ///Shift Right Arithmetic Immediate (Sign extend)
     pub const SRAI: (u8, u8) = (Self::SRLI_SRAI_F3, 0x10);
 }
 
@@ -119,6 +122,15 @@ impl InstructionsExecutor {
                 .wrapping_add(instruction.get_u_imm())
                 //subtract the isntruction size as we move the program counter by that at the begining of the execution
                 .wrapping_sub(DEFAULT_INSTRUCTION_SIZE_BYTES as u64),
+        )
+    }
+
+    #[inline(always)]
+    pub fn addiw(cpu: &mut Cpu, instruction: impl ITypeDecoder) -> AppResult<OperationSideEffect> {
+        cpu.write_reg(
+            instruction.get_rd_field() as usize,
+            cpu.registers[instruction.get_rs1_field() as usize]
+                .wrapping_add(instruction.get_i_imm()) as i32 as i64 as u64,
         )
     }
 }

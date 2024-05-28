@@ -19,6 +19,8 @@ impl SubFunctions {
     pub const SLL: (u8, u8) = (0b001, 0b0000000);
     pub const SRL: (u8, u8) = (0b101, 0b0000000);
     pub const SRA: (u8, u8) = (0b101, 0b0100000);
+    pub const ADDW: (u8, u8) = (0x00, 0x00);
+    pub const SUBW: (u8, u8) = (0x00, 0b0100000);
 }
 
 impl InstructionsExecutor {
@@ -118,6 +120,33 @@ impl InstructionsExecutor {
             (cpu.registers[instruction.get_rs1_field() as usize] as i64)
                 .wrapping_shr((cpu.registers[instruction.get_rs2_field() as usize] & 0x3f) as u32)
                 as u64,
+        )
+    }
+
+    /// Adds the value held on rs2 to rs1 and sets to rd:
+    /// rd = rs1 + rs2
+    /// This instruction only sets the lower 32 bits and
+    /// sign extends the value to 64
+    #[inline(always)]
+    pub fn addw(cpu: &mut Cpu, instruction: impl RTypeDecoder) -> AppResult<OperationSideEffect> {
+        cpu.write_reg(
+            instruction.get_rd_field() as usize,
+            cpu.registers[instruction.get_rs1_field() as usize]
+                .wrapping_add(cpu.registers[instruction.get_rs2_field() as usize])
+                as i32 as i64 as u64,
+        )
+    }
+    /// Substract the value held on rs2 to rs1 and sets to rd:
+    /// rd = rs1 - rs2
+    /// This instruction only sets the lower 32 bits and
+    /// sign extends the value to 64
+    #[inline(always)]
+    pub fn subw(cpu: &mut Cpu, instruction: impl RTypeDecoder) -> AppResult<OperationSideEffect> {
+        cpu.write_reg(
+            instruction.get_rd_field() as usize,
+            cpu.registers[instruction.get_rs1_field() as usize]
+                .wrapping_sub(cpu.registers[instruction.get_rs2_field() as usize])
+                as i32 as i64 as u64,
         )
     }
 }
