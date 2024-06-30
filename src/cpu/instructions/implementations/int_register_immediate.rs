@@ -18,6 +18,7 @@ impl SubFunctions {
     //For opcode 0010011(0x13)
     ///Add Immediate
     pub const ADDI: u8 = 0x0;
+    ///Add Immediate Word
     pub const ADDIW: (u8, u8) = (0b000, 0b000);
     ///Set less than immediate
     pub const SLTI: u8 = 0x2;
@@ -28,14 +29,20 @@ impl SubFunctions {
     pub const ANDI: u8 = 0x7;
     ///Shift Left Logical Immediate
     pub const SLLI: u8 = 0x01;
-    pub const SRLI_SRAI_F3: u8 = 0x05;
+    ///Shift Left Logical Immediate Word
+    pub const SLLIW: (u8, u8) = (0b001, 0b0000000);
+    pub const SRLI_SRAI_F3: u8 = 0b101;
     ///Shift Right Logical Immediate
     pub const SRLI: (u8, u8) = (Self::SRLI_SRAI_F3, 0x00);
     ///Shift Right Arithmetic Immediate (Sign extend)
     pub const SRAI: (u8, u8) = (Self::SRLI_SRAI_F3, 0x10);
+    ///Shift Right Logical Immediate Word
+    pub const SRLIW: (u8, u8) = (Self::SRLI_SRAI_F3, 0x00);
+    pub const SRAIW: (u8, u8) = (Self::SRLI_SRAI_F3, 0b010_0000);
 }
 
 impl InstructionsExecutor {
+    /// Adds an immediate value to the value held on the rs1 register
     #[inline(always)]
     pub fn addi(cpu: &mut Cpu, instruction: impl ITypeDecoder) -> AppResult<OperationSideEffect> {
         cpu.write_reg(
@@ -44,7 +51,7 @@ impl InstructionsExecutor {
                 .wrapping_add(instruction.get_i_imm() as u64),
         )
     }
-
+    ///Set less than immediate
     #[inline(always)]
     pub fn slti(cpu: &mut Cpu, instruction: impl ITypeDecoder) -> AppResult<OperationSideEffect> {
         let value = (cpu.registers[instruction.get_rs1_field() as usize] as i64)
@@ -52,6 +59,7 @@ impl InstructionsExecutor {
         cpu.write_reg(instruction.get_rd_field() as usize, value as u64)
     }
 
+    ///Set less than immediate unsigned
     #[inline(always)]
     pub fn sltiu(cpu: &mut Cpu, instruction: impl ITypeDecoder) -> AppResult<OperationSideEffect> {
         let value = cpu.registers[instruction.get_rs1_field() as usize] < instruction.get_i_imm();
@@ -92,6 +100,16 @@ impl InstructionsExecutor {
     }
 
     #[inline(always)]
+    pub fn slliw(cpu: &mut Cpu, instruction: impl ITypeDecoder) -> AppResult<OperationSideEffect> {
+        let shamt = (instruction.get_i_imm() & 0x1f) as u32; // shamt is encoded in the lower 5bit of the imm for RV64I
+        cpu.write_reg(
+            instruction.get_rd_field() as usize,
+            cpu.registers[instruction.get_rs1_field() as usize].wrapping_shl(shamt) as i32 as i64
+                as u64,
+        )
+    }
+
+    #[inline(always)]
     pub fn srli(cpu: &mut Cpu, instruction: impl ITypeDecoder) -> AppResult<OperationSideEffect> {
         let shamt = (instruction.get_i_imm() & 0x3f) as u32; // shamt is encoded in the lower 6bit of the imm for RV64I
         cpu.write_reg(
@@ -101,11 +119,31 @@ impl InstructionsExecutor {
     }
 
     #[inline(always)]
+    pub fn srliw(cpu: &mut Cpu, instruction: impl ITypeDecoder) -> AppResult<OperationSideEffect> {
+        let shamt = (instruction.get_i_imm() & 0x1f) as u32; // shamt is encoded in the lower 6bit of the imm for RV64I
+        cpu.write_reg(
+            instruction.get_rd_field() as usize,
+            cpu.registers[instruction.get_rs1_field() as usize].wrapping_shr(shamt) as i32 as i64
+                as u64,
+        )
+    }
+
+    #[inline(always)]
     pub fn srai(cpu: &mut Cpu, instruction: impl ITypeDecoder) -> AppResult<OperationSideEffect> {
         let shamt = (instruction.get_i_imm() & 0x3f) as u32; // shamt is encoded in the lower 6bit of the imm for RV64I
         cpu.write_reg(
             instruction.get_rd_field() as usize,
             (cpu.registers[instruction.get_rs1_field() as usize] as i64).wrapping_shr(shamt) as u64,
+        )
+    }
+
+    #[inline(always)]
+    pub fn sraiw(cpu: &mut Cpu, instruction: impl ITypeDecoder) -> AppResult<OperationSideEffect> {
+        let shamt = (instruction.get_i_imm() & 0x1f) as u32; // shamt is encoded in the lower 6bit of the imm for RV64I
+        cpu.write_reg(
+            instruction.get_rd_field() as usize,
+            (cpu.registers[instruction.get_rs1_field() as usize] as i32).wrapping_shr(shamt) as i64
+                as u64,
         )
     }
 

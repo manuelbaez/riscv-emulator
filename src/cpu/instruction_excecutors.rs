@@ -138,6 +138,9 @@ impl Cpu {
                 };
                 match (decoder.get_funct3_field(), funct7) {
                     SubFunctions::ADDIW => InstructionsExecutor::addiw(self, decoder),
+                    SubFunctions::SLLIW => InstructionsExecutor::slliw(self, decoder),
+                    SubFunctions::SRLIW => InstructionsExecutor::srliw(self, decoder),
+                    SubFunctions::SRAIW => InstructionsExecutor::sraiw(self, decoder),
                     _ => Err(AppErrors::FuctionNotImplemented(
                         decoder.get_funct3_field(),
                         Some(decoder.get_funct7_field()),
@@ -148,6 +151,9 @@ impl Cpu {
                 match (decoder.get_funct3_field(), decoder.get_funct7_field()) {
                     SubFunctions::ADDW => InstructionsExecutor::addw(self, decoder),
                     SubFunctions::SUBW => InstructionsExecutor::subw(self, decoder),
+                    SubFunctions::SLLW => InstructionsExecutor::sllw(self, decoder),
+                    SubFunctions::SRLW => InstructionsExecutor::srlw(self, decoder),
+                    SubFunctions::SRAW => InstructionsExecutor::sraw(self, decoder),
                     _ => Err(AppErrors::FuctionNotImplemented(
                         decoder.get_funct3_field(),
                         Some(decoder.get_funct7_field()),

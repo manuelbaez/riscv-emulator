@@ -17,8 +17,11 @@ impl SubFunctions {
     pub const OR: (u8, u8) = (0b110, 0b0000000);
     pub const XOR: (u8, u8) = (0b100, 0b0000000);
     pub const SLL: (u8, u8) = (0b001, 0b0000000);
+    pub const SLLW: (u8, u8) = (0b001, 0b0000000);
     pub const SRL: (u8, u8) = (0b101, 0b0000000);
+    pub const SRLW: (u8, u8) = (0b101, 0b0000000);
     pub const SRA: (u8, u8) = (0b101, 0b0100000);
+    pub const SRAW: (u8, u8) = (0b101, 0b0100000);
     pub const ADDW: (u8, u8) = (0x00, 0x00);
     pub const SUBW: (u8, u8) = (0x00, 0b0100000);
 }
@@ -101,6 +104,17 @@ impl InstructionsExecutor {
                 .wrapping_shl((cpu.registers[instruction.get_rs2_field() as usize] & 0x3f) as u32),
         )
     }
+    /// Performs a logical left shift on rs1 by the shift amount
+    /// in the first 5 bits held in rs2; rd = rs1 << (rs2 & 0x3f)
+    #[inline(always)]
+    pub fn sllw(cpu: &mut Cpu, instruction: impl RTypeDecoder) -> AppResult<OperationSideEffect> {
+        cpu.write_reg(
+            instruction.get_rd_field() as usize,
+            (cpu.registers[instruction.get_rs1_field() as usize] as u32)
+                .wrapping_shl((cpu.registers[instruction.get_rs2_field() as usize] & 0x1f) as u32)
+                as i32 as i64 as u64,
+        )
+    }
     /// Performs a logical right shift on rs1 by the shift amount
     /// in the first 6 bits held in rs2; rd = rs1 >> (rs2 & 0x3f)
     #[inline(always)]
@@ -109,6 +123,17 @@ impl InstructionsExecutor {
             instruction.get_rd_field() as usize,
             cpu.registers[instruction.get_rs1_field() as usize]
                 .wrapping_shr((cpu.registers[instruction.get_rs2_field() as usize] & 0x3f) as u32),
+        )
+    }
+    /// Performs a logical right shift on rs1 by the shift amount
+    /// in the first 5 bits held in rs2; rd = rs1 >> (rs2 & 0x3f)
+    #[inline(always)]
+    pub fn srlw(cpu: &mut Cpu, instruction: impl RTypeDecoder) -> AppResult<OperationSideEffect> {
+        cpu.write_reg(
+            instruction.get_rd_field() as usize,
+            (cpu.registers[instruction.get_rs1_field() as usize] as u32)
+                .wrapping_shr((cpu.registers[instruction.get_rs2_field() as usize] & 0x1f) as u32)
+                as i32 as i64 as u64,
         )
     }
     /// Performs a arimetric right shift (sign-extended) on rs1 by the shift amount
@@ -122,7 +147,17 @@ impl InstructionsExecutor {
                 as u64,
         )
     }
-
+    /// Performs a arimetric right shift (sign-extended) on rs1 by the shift amount
+    /// in the first 5 bits held in rs2; rd = (rs1 as i64) >> (rs2 & 0x3f)
+    #[inline(always)]
+    pub fn sraw(cpu: &mut Cpu, instruction: impl RTypeDecoder) -> AppResult<OperationSideEffect> {
+        cpu.write_reg(
+            instruction.get_rd_field() as usize,
+            (cpu.registers[instruction.get_rs1_field() as usize] as i32)
+                .wrapping_shr((cpu.registers[instruction.get_rs2_field() as usize] & 0x1f) as u32)
+                as i64 as u64,
+        )
+    }
     /// Adds the value held on rs2 to rs1 and sets to rd:
     /// rd = rs1 + rs2
     /// This instruction only sets the lower 32 bits and
